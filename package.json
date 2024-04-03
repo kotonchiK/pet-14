@@ -8,7 +8,7 @@
   "scripts": {
     "server": "ssh -R 80:localhost:3000 serveo.net",
     "server2": "lt --port 3000",
-    "build": "yarn run build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -36,7 +36,8 @@
     "mongodb": "^6.5.0",
     "mongoose": "^8.2.4",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "vercel": "^33.6.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
