@@ -1,0 +1,10 @@
+import { ArgumentMetadata, Injectable, NotFoundException, PipeTransform } from "@nestjs/common";
+@Injectable()
+export class ValidateObjectId implements PipeTransform<string> {
+  async transform(value: string, metadata: ArgumentMetadata) {
+    if (!value.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new NotFoundException('Invalid ObjectId');
+    }
+    return value;
+  }
+}
