@@ -8,7 +8,7 @@
   "scripts": {
     "server": "ssh -R 80:localhost:3000 serveo.net",
     "server2": "lt --port 3000",
-    "build": "nest build",
+    "build": "yarn run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
