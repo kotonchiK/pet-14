@@ -8,7 +8,8 @@ import { BlogsModule } from "./features/blogs/api/blogs.module";
 import { PostsModule } from "./features/posts/api/posts.module";
 import { CommentsModule } from "./features/comments/api/comments.module";
 import { TestingModule } from "./features/testing/api/testing.module";
-
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from 'path';
 
 @Module({
   controllers:[AppController],
@@ -23,6 +24,10 @@ import { TestingModule } from "./features/testing/api/testing.module";
 
     ConfigModule.forRoot({
       envFilePath:'.env'
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'swagger-static'),
+      serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
     }),
 
 
