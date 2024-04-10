@@ -1,16 +1,31 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UsePipes, ValidationPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode, HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe
+} from "@nestjs/common";
 import { UsersService } from "../application/users.service";
 import { CreateUserDto } from "./models/input";
 import { OutputUserModel } from "./models/output";
 import { SortDirection } from "mongodb";
 import { Pagination } from "../../../base/types/pagination.type";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
+import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
 
-@Controller('/users')
+@Controller('users')
+@UseGuards(new BasicAuthGuard())
 export class UsersController {
   constructor(private usersService:UsersService) {}
 
   @Get()
+  @UseGuards(BasicAuthGuard)
   async getUsers(
     @Query('sortBy') sortBy:string,
     @Query('sortDirection') sortDirection:SortDirection,
@@ -31,14 +46,16 @@ export class UsersController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
   @UsePipes(ValidationPipe)
-  async createUser(@Body() dto:CreateUserDto):Promise<OutputUserModel> {
+  async createUser(@Body() body :CreateUserDto):Promise<OutputUserModel> {
 
-    return await this.usersService.createUser(dto)
+    return await this.usersService.createUser(body)
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @UseGuards(BasicAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
   async deleteUser(@Param('id', ValidateObjectId) id:string):Promise<boolean> {
     return await this.usersService.deleteUser(id)
   }

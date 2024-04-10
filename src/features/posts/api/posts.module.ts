@@ -9,13 +9,16 @@ import { BlogsQueryRepository } from "../../blogs/infrastructure/blogs.query.rep
 import { BlogFeature } from "../../../infrastructure/domains/schemas/blogs.schema";
 import { CommentsQueryRepository } from "../../comments/infrastructure/comments.query.repository";
 import { CommentFeature } from "../../../infrastructure/domains/schemas/comments.schema";
+import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
+import { JwtAuthService } from "../../users/application/jwt.service";
+import { UsersQueryRepository } from "../../users/infrastructure/users.query.repository";
+import { TokensFeature, UserFeature } from "../../../infrastructure/domains/schemas/users.schema";
 
 @Module({
   controllers:[PostsController],
-  providers:[PostsRepository, PostsService, PostsQueryRepository, BlogsQueryRepository, CommentsQueryRepository],
-  exports:[PostsRepository, PostsService, PostsQueryRepository, BlogsQueryRepository, CommentsQueryRepository],
+  providers:[PostsRepository, PostsService, PostsQueryRepository, BlogsQueryRepository, CommentsQueryRepository, JwtAuthGuard, JwtAuthService, UsersQueryRepository],
   imports:[MongooseModule.forFeature([
-    PostFeature, PostLikesFeature, BlogFeature, CommentFeature
+    PostFeature, PostLikesFeature, BlogFeature, CommentFeature, UserFeature, TokensFeature
   ])]
 })
 export class PostsModule {}

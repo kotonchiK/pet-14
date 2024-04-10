@@ -2,10 +2,12 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ObjectId } from "mongodb";
 import { User, UserDocument } from "../../../infrastructure/domains/schemas/users.schema";
-import { UserDb } from "../api/models/input";
+import { CodeDto, UserDb } from "../api/models/input";
+import { randomUUID } from "node:crypto";
+import { add } from "date-fns";
 
 export class UsersRepository {
-  constructor(@InjectModel(User.name) private userModel:Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) public userModel:Model<UserDocument>) {}
   async createUser(newUser:UserDb):Promise<UserDocument | null> {
     try {
       const createdUser = new this.userModel(newUser)
@@ -30,4 +32,44 @@ export class UsersRepository {
       return false
     }
   }
+
+   async emailConfirmation(code:CodeDto):Promise<boolean>{
+    try{
+      const user = await this.userModel.findOne({"emailConfirmation.confirmationCode":code.code}).lean()
+      if(!user) return false
+      if(user.emailConfirmation.isConfirmed) return false
+      if(new Date() > user.emailConfirmation.expirationDate) return false
+
+      const isConfirm = await this.userModel.findByIdAndUpdate(
+        {_id:user._id},
+        {$set:{"emailConfirmation.isConfirmed":true}})
+      return !!isConfirm
+
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+
+
+  async updateCodeConfirmationInfo(userId:string):Promise<string>{
+    try {
+      const confirmationCode = randomUUID()
+      const expirationDate = add(new Date(), { hours: 1, minutes: 30, })
+
+      await this.userModel.findByIdAndUpdate({ _id: new ObjectId(userId) },
+        {
+          $set: {
+            "emailConfirmation.confirmationCode": confirmationCode,
+            "emailConfirmation.expirationDate": expirationDate
+          }
+        })
+      return confirmationCode
+    } catch (e) {
+      console.log('Confirm code info was not updated')
+      return null
+    }
+  }
+
+
 }

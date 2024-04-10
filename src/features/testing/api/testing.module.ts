@@ -4,7 +4,11 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { BlogFeature } from "../../../infrastructure/domains/schemas/blogs.schema";
 import { PostFeature, PostLikesFeature } from "../../../infrastructure/domains/schemas/posts.schema";
 import { CommentFeature } from "../../../infrastructure/domains/schemas/comments.schema";
-import { UserFeature } from "../../../infrastructure/domains/schemas/users.schema";
+import {
+  passwordChangeFeature,
+  TokensFeature,
+  UserFeature
+} from "../../../infrastructure/domains/schemas/users.schema";
 import { TestingService } from "../application/testing.service";
 
 @Module({
@@ -13,7 +17,7 @@ import { TestingService } from "../application/testing.service";
   exports:[TestingService],
   imports:[
     MongooseModule.forFeature([
-    BlogFeature, PostFeature, PostLikesFeature, CommentFeature, UserFeature
+    BlogFeature, PostFeature, PostLikesFeature, CommentFeature, UserFeature, passwordChangeFeature, TokensFeature
   ])]
 })
 export class TestingModule{}

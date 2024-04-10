@@ -15,11 +15,48 @@ export class CreateUserDto  {
   readonly password:string
 }
 
+
+
+export class NewPasswordDto {
+  @IsString({message:'Must be string'})
+  @Length(6, 20, {message:'Length is false'})
+  readonly newPassword:string
+
+  @IsString({message:'Must be string'})
+  readonly recoveryCode:string
+}
+
+export class MailDto {
+  @IsEmail()
+  @IsString({message:'Must be string'})
+  readonly email:string
+}
+export class CodeDto {
+  @IsString({message:'Must be string'})
+  readonly code:string
+}
+
+
+export class loginUserDto {
+  @IsString({message:'Must be string'})
+  readonly loginOrEmail:string
+
+  @IsString({message:'Must be string'})
+  readonly password:string
+}
+
 export class UserDb {
   readonly login:string;
   readonly email:string;
   readonly password:string;
   readonly createdAt:Date;
+  readonly emailConfirmation:emailConfirmation
+}
+
+type emailConfirmation = {
+  confirmationCode:string
+  expirationDate:Date
+  isConfirmed:boolean
 }
 
 export type UsersQueryModel = {

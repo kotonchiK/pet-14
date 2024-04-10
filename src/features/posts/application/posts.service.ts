@@ -36,6 +36,7 @@ export class PostsService {
 
   async createPost(dto:CreatePostDto, userId:string):Promise<OutputPostModel> {
     const blog = await this.blogQueryRepository.isBlog(dto.blogId)
+
     if(!blog) throw new NotFoundException('Blog is not exist')
 
     const blogInfo = await this.blogQueryRepository.getBlogById(dto.blogId)

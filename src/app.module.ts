@@ -10,6 +10,8 @@ import { CommentsModule } from "./features/comments/api/comments.module";
 import { TestingModule } from "./features/testing/api/testing.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from 'path';
+import { JwtModule } from "@nestjs/jwt";
+import { AuthModule } from "./features/users/api/auth.module";
 
 @Module({
   controllers:[AppController],
@@ -20,6 +22,7 @@ import { join } from 'path';
     PostsModule,
     CommentsModule,
     TestingModule,
+    AuthModule,
 
 
     ConfigModule.forRoot({
@@ -28,6 +31,10 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
       serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
+    }),
+    JwtModule.register({
+      secret:process.env.JWT_SECRET,
+      signOptions:{expiresIn:'5m'}
     }),
 
 

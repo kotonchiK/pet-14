@@ -3,11 +3,11 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
+  HttpCode, HttpStatus,
   Param,
   Post,
   Put,
-  Query,
+  Query, UseGuards,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
@@ -18,6 +18,7 @@ import { CreatePostDto } from "./models/input";
 import { OutputPostModel } from "./models/output";
 import { OutputCommentModel } from "../../comments/api/models/output";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
+import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 
 @Controller('/posts')
 export class PostsController {
@@ -65,7 +66,7 @@ export class PostsController {
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
   async createPost(@Body() dto:CreatePostDto):Promise<OutputPostModel> {
 
     return await this.postsService.createPost(dto, '')
@@ -73,7 +74,8 @@ export class PostsController {
 
   @Put(':id')
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostById(
     @Param('id', ValidateObjectId) id:string,
     @Body() dto:CreatePostDto):Promise<void>{
@@ -83,7 +85,8 @@ export class PostsController {
 
   @Delete(':id')
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id', ValidateObjectId) id:string):Promise<void> {
     return await this.postsService.deletePost(id)
   }

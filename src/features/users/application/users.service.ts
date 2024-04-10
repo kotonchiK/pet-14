@@ -3,10 +3,12 @@ import { CreateUserDto, UserDb, UsersQueryModel } from "../api/models/input";
 import { userMapper } from "../../../infrastructure/mappers/users.mapper";
 import { OutputUserModel } from "../api/models/output";
 import { UserDocument } from "../../../infrastructure/domains/schemas/users.schema";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UsersQueryRepository } from "../infrastructure/users.query.repository";
 import { Pagination } from "../../../base/types/pagination.type";
 import { UsersRepository } from "../infrastructure/users.repository";
+import { add } from "date-fns";
+import { randomUUID } from "node:crypto";
 
 @Injectable()
 export class UsersService {
@@ -28,7 +30,15 @@ export class UsersService {
       login:dto.login,
       password: passwordHash,
       email:dto.email,
-      createdAt:new Date()
+      createdAt:new Date(),
+      emailConfirmation:{
+        confirmationCode: randomUUID(),
+        expirationDate: add(new Date(), {
+          hours: 1,
+          minutes: 30,
+        }),
+        isConfirmed: false
+      }
     }
 
     const createdUser:UserDocument = await this.usersRepository.createUser(userInfo)

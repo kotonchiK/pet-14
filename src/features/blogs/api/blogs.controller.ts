@@ -3,11 +3,11 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
+  HttpCode, HttpStatus,
   Param,
   Post,
   Put,
-  Query,
+  Query, UseGuards,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
@@ -19,7 +19,7 @@ import { CreateBlogDto, CreatePostBlogDto } from "./models/input";
 import { PostsService } from "../../posts/application/posts.service";
 import { OutputPostModel } from "../../posts/api/models/output";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
-
+import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 @Controller('/blogs')
 export class BlogsController {
   constructor(private blogsService:BlogsService,
@@ -70,7 +70,7 @@ export class BlogsController {
   }
 
   @Post()
-  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
   async createBlog(@Body() dto:CreateBlogDto):Promise<OutputBlogModel> {
 
     return await this.blogsService.createBlog(dto)
@@ -78,6 +78,7 @@ export class BlogsController {
 
   @Post(':id/posts')
   @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
   async createPostForBlog(
     @Param('id', ValidateObjectId) id:string,
     @Body() dto:CreatePostBlogDto):Promise<OutputPostModel> {
@@ -90,7 +91,8 @@ export class BlogsController {
 
   @Put(':id')
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlogById(
     @Param('id', ValidateObjectId) id:string,
     @Body() dto:CreateBlogDto):Promise<void>{
@@ -100,7 +102,8 @@ export class BlogsController {
 
   @Delete(':id')
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id', ValidateObjectId) id:string):Promise<void> {
     return await this.blogsService.deleteBlog(id)
   }
