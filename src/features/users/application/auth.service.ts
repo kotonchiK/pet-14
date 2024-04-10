@@ -84,7 +84,7 @@ export class AuthService {
         refresh: refreshToken
       }
     } else {
-      throw new NotFoundException('userLogin - error')
+      throw new UnauthorizedException('userLogin - error')
     }
   }
 
@@ -92,20 +92,20 @@ export class AuthService {
   async emailConfirmation(dto:CodeDto):Promise<void>{
     const isConfirmed = await this.usersRepository.emailConfirmation(dto)
 
-    if(!isConfirmed) throw new BadRequestException('Confirm problem')
+    if(!isConfirmed) throw new BadRequestException({message:'Confirm problem', field:'code'})
   }
 
 
    async emailResending(email:MailDto):Promise<void> {
     const user = await this.usersQueryRepository.findByEmail(email)
 
-    if (user.emailConfirmation.isConfirmed) throw new BadRequestException('Code is confirm')
+    if (user.emailConfirmation.isConfirmed) throw new BadRequestException({message:'Confirm problem', field:'email'})
 
     const userId = (user._id).toString()
 
      const confirmationCode = await this.usersRepository.updateCodeConfirmationInfo(userId)
 
-     if(!confirmationCode) throw new BadRequestException('Info about new code was not updated')
+     if(!confirmationCode) throw new BadRequestException({message:'Confirm problem', field:'code'})
 
      try {
       await this.emailManager.sendEmailConfirmationCode(user.email, confirmationCode)

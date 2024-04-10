@@ -19,6 +19,7 @@ import { OutputPostModel } from "./models/output";
 import { OutputCommentModel } from "../../comments/api/models/output";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
+import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
 
 @Controller('/posts')
 export class PostsController {
@@ -66,7 +67,7 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   async createPost(@Body() dto:CreatePostDto):Promise<OutputPostModel> {
 
     return await this.postsService.createPost(dto, '')
@@ -74,7 +75,7 @@ export class PostsController {
 
   @Put(':id')
   @UsePipes(ValidationPipe)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostById(
     @Param('id', ValidateObjectId) id:string,
@@ -85,7 +86,7 @@ export class PostsController {
 
   @Delete(':id')
   @UsePipes(ValidationPipe)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id', ValidateObjectId) id:string):Promise<void> {
     return await this.postsService.deletePost(id)

@@ -6,7 +6,7 @@ import { loginUserDto, MailDto, UsersQueryModel } from "../api/models/input";
 import { userMapper } from "../../../infrastructure/mappers/users.mapper";
 import { Pagination } from "../../../base/types/pagination.type";
 import { OutputUserModel } from "../api/models/output";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import * as bcrypt from 'bcryptjs';
 import { DecodedRefreshToken } from "../api/models/tokens.models";
 
@@ -70,18 +70,18 @@ export class UsersQueryRepository {
             ]})
       .lean()
 
-    if(!getUser) throw new NotFoundException('User is not exist')
+    if(!getUser) throw new UnauthorizedException('User is not exist')
 
     const isPassword = await bcrypt.compare(user.password, getUser.password)
 
     if(isPassword) return getUser._id.toString()
 
-    throw new NotFoundException('Password is not correct')
+    throw new UnauthorizedException('Password is not correct')
   }
 
    async findByEmail(dto:MailDto):Promise<UserDocument> {
     const getUser = await this.userModel.findOne({"email": dto.email}).lean()
-    if (!getUser) throw new NotFoundException('User is not exist')
+    if (!getUser) throw new BadRequestException({message:'Confirm problem', field:'email'})
     return getUser
   }
 

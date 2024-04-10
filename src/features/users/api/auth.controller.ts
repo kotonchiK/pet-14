@@ -33,6 +33,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @HttpCode(HttpStatus.OK)
   @UsePipes(ValidationPipe)
   async login(@Body() dto:loginUserDto,
               @Res() res: Response):Promise<any> {
@@ -48,7 +49,7 @@ export class AuthController {
 
   @Post('/registration-confirmation')
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async emailConfirmation(@Body() dto:CodeDto):Promise<void>{
 
     await this.authService.emailConfirmation(dto)

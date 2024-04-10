@@ -5,6 +5,7 @@ import { User, UserDocument } from "../../../infrastructure/domains/schemas/user
 import { CodeDto, UserDb } from "../api/models/input";
 import { randomUUID } from "node:crypto";
 import { add } from "date-fns";
+import { BadRequestException } from "@nestjs/common";
 
 export class UsersRepository {
   constructor(@InjectModel(User.name) public userModel:Model<UserDocument>) {}
@@ -16,8 +17,19 @@ export class UsersRepository {
 
       return createdUser
 
-    } catch (e) {
-      console.log('Create-User error => ', e)
+    } catch (error) {
+      if(error.code === 11000){
+        let fieldName = ''
+        if(error.keyPattern.login){
+          fieldName = 'login'
+        } else if (error.keyPattern.email) {
+              fieldName = 'email';
+        }
+        if(fieldName) {
+          throw new BadRequestException({message:`User with this ${fieldName} already exists`, field:fieldName})
+        }
+      }
+      console.log('Create-User error => ', error)
       return null
     }
   }
@@ -46,8 +58,7 @@ export class UsersRepository {
       return !!isConfirm
 
     } catch (error) {
-      console.log(error)
-      return false
+      throw new BadRequestException({message:'Confirm problem', field:'code'})
     }
   }
 

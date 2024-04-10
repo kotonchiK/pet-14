@@ -96,7 +96,7 @@ window.onload = function() {
             }
           ],
           "responses": {
-            "201": {
+            "204": {
               "description": ""
             }
           }
@@ -535,7 +535,7 @@ window.onload = function() {
             }
           },
           "responses": {
-            "201": {
+            "200": {
               "description": ""
             }
           }

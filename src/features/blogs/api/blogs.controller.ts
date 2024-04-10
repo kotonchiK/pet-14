@@ -20,6 +20,7 @@ import { PostsService } from "../../posts/application/posts.service";
 import { OutputPostModel } from "../../posts/api/models/output";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
+import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
 @Controller('/blogs')
 export class BlogsController {
   constructor(private blogsService:BlogsService,
@@ -70,7 +71,7 @@ export class BlogsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   async createBlog(@Body() dto:CreateBlogDto):Promise<OutputBlogModel> {
 
     return await this.blogsService.createBlog(dto)
@@ -78,7 +79,7 @@ export class BlogsController {
 
   @Post(':id/posts')
   @UsePipes(ValidationPipe)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   async createPostForBlog(
     @Param('id', ValidateObjectId) id:string,
     @Body() dto:CreatePostBlogDto):Promise<OutputPostModel> {
@@ -91,7 +92,7 @@ export class BlogsController {
 
   @Put(':id')
   @UsePipes(ValidationPipe)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlogById(
     @Param('id', ValidateObjectId) id:string,
@@ -102,7 +103,7 @@ export class BlogsController {
 
   @Delete(':id')
   @UsePipes(ValidationPipe)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id', ValidateObjectId) id:string):Promise<void> {
     return await this.blogsService.deleteBlog(id)
