@@ -13,7 +13,6 @@ export class BlogsRepository {
       await createdBlog.save()
 
       return createdBlog
-
     } catch (e) {
       console.log('Create-User error => ', e)
       return null

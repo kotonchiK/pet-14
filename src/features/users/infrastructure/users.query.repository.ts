@@ -86,13 +86,12 @@ export class UsersQueryRepository {
   }
 
 
-  async checkList(token:DecodedRefreshToken):Promise<boolean> {
+  async checkList(token:DecodedRefreshToken):Promise<void> {
     const filter = {
       "deviceId":token.deviceId,
       "iat":token.iat
     }
-    const isWhite = await this.tokensModel.findOne(filter)
-    return !!isWhite;
-  };
-
+    const isToken = await this.tokensModel.findOne(filter).lean()
+    if(!isToken) throw new UnauthorizedException('Refresh token is not in white list')
+  }
 }

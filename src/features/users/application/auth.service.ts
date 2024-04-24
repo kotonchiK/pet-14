@@ -118,11 +118,7 @@ export class AuthService {
   async refreshTokenAuthorization(token:string):Promise<ReqRefData | null> {
     const refreshToken = await this.jwtService.getRefToken(token)
 
-    if (!refreshToken) throw new UnauthorizedException('Refresh token is false')
-
-    const isWhite = await this.usersQueryRepository.checkList(refreshToken)
-
-    if (!isWhite) throw new UnauthorizedException('Refresh token is not in white list')
+    await this.usersQueryRepository.checkList(refreshToken)
 
     return {
       userId: refreshToken.userId,
@@ -135,12 +131,13 @@ export class AuthService {
       "userId":userId,
       "deviceId":deviceId
     }
-
-    await this.tokensModel.deleteOne(filter)
-
-    const isToken = await this.tokensModel.findOne(filter)
+    try {
+      await this.tokensModel.deleteOne(filter)
+    } catch (e) {
+      throw new NotFoundException('')
+    }
+    const isToken = await this.tokensModel.findOne(filter).lean()
     if(isToken) throw new UnauthorizedException('tokens expaired or noch etwas')
-
   }
 
   async passwordRecovery(email:MailDto):Promise<void> {

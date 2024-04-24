@@ -6,6 +6,8 @@ import { Comment, CommentDocument } from "../../../infrastructure/domains/schema
 import { commentMapper } from "../../../infrastructure/mappers/comments.mapper";
 import { PostQueryModel } from "../../posts/api/models/input";
 import { Pagination } from "../../../base/types/pagination.type";
+import { NotFoundException } from "@nestjs/common";
+import { statusType } from "../../../base/models/likeStatusDto";
 
 export class CommentsQueryRepository {
   constructor(@InjectModel(Comment.name) private commentModel:Model<CommentDocument>) {}
@@ -43,7 +45,7 @@ export class CommentsQueryRepository {
 
   async getCommentById(commentId:string, userId:string):Promise<OutputCommentModel> {
     const comment = await this.commentModel.findById(new ObjectId(commentId))
-
+    if(!comment) throw new NotFoundException('Comment is not exist')
     const likesInfo = await this.likesInfo(comment, userId)
 
     return commentMapper(comment, likesInfo)
@@ -57,9 +59,8 @@ export class CommentsQueryRepository {
         myStatus: "None"
       }
     }
-
-    const isUserId: string[] = userId.split('')
-    let status = "None"
+     const isUserId: string[] = userId.split('')
+     let status = "None"
 
     if(isUserId.length > 1) {
       const user = comment.usersLikes.map((like) =>  {
@@ -97,6 +98,8 @@ export class CommentsQueryRepository {
       return false;
     }
   }
+
+
 }
 
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreatePostDto, PostDb, PostQueryModel } from "../api/models/input";
 import { PostsQueryRepository } from "../infrastructure/posts.query.repository";
 import { Pagination } from "../../../base/types/pagination.type";
@@ -8,6 +8,7 @@ import { BlogsQueryRepository } from "../../blogs/infrastructure/blogs.query.rep
 import { PostDocument } from "../../../infrastructure/domains/schemas/posts.schema";
 import { CommentsQueryRepository } from "../../comments/infrastructure/comments.query.repository";
 import { OutputCommentModel } from "../../comments/api/models/output";
+import { statusType } from "../../../base/models/likeStatusDto";
 
 @Injectable()
 export class PostsService {
@@ -37,7 +38,7 @@ export class PostsService {
   async createPost(dto:CreatePostDto, userId:string):Promise<OutputPostModel> {
     const blog = await this.blogQueryRepository.isBlog(dto.blogId)
 
-    if(!blog) throw new NotFoundException('Blog is not exist')
+    if(!blog) throw new NotFoundException({message:'Blog is not exist'})
 
     const blogInfo = await this.blogQueryRepository.getBlogById(dto.blogId)
 
@@ -62,7 +63,7 @@ export class PostsService {
 
     const blog = await this.blogQueryRepository.isBlog(dto.blogId)
 
-    if(!blog) throw new NotFoundException('Blog is not exist')
+    if(!blog) throw new BadRequestException({message:'Blog is not exist', field:'blogId'})
 
     const post = await this.postsQueryRepository.isPost(id)
 
@@ -94,9 +95,14 @@ export class PostsService {
 
     return await this.commentsQueryRepository.getCommentsForPost(sortData, postId, userId)
 
+  }
+  async setLikeStatus(dto:statusType):Promise<void> {
+    const isPost = await this.postsQueryRepository.isPost(dto.id)
+    if(!isPost) throw new NotFoundException('Comment is not exist')
 
+    const likeStatus = await this.postsRepository.updateLikeStatus(dto)
 
-
+    if(!likeStatus) throw new BadRequestException({message:'Status was not updated', field:'likeStatus'})
   }
 
 }

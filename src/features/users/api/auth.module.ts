@@ -16,21 +16,31 @@ import { EmailAdapter } from "../../../infrastructure/email/email.adapter";
 import { RefreshTokenMiddleware } from "../../../infrastructure/middlewares/refToken.mdw";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { JwtService } from "@nestjs/jwt";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   controllers:[AuthController],
-  providers:[UsersRepository, UsersService, UsersQueryRepository, AuthService, JwtAuthService, JwtAuthGuard, JwtService, EmailManager,EmailAdapter, RefreshTokenMiddleware
+  providers:[
+    UsersRepository, UsersService, UsersQueryRepository, AuthService,
+    JwtAuthService, JwtAuthGuard, JwtService, EmailManager,EmailAdapter, RefreshTokenMiddleware
   ],
   exports:[UsersRepository, UsersService, UsersQueryRepository, AuthService, JwtAuthService, EmailManager,EmailAdapter],
   imports:[
+    ThrottlerModule.forRoot([{
+      ttl: 10_000,
+      limit: 5,
+    }]),
     MongooseModule.forFeature([
     UserFeature, TokensFeature, passwordChangeFeature
   ])]
 })
 export class AuthModule {
   configure(consumer) {
-  consumer
-    .apply(RefreshTokenMiddleware)
-    .forRoutes({ path: 'auth/refresh-token', method: RequestMethod.POST });
-}
+    consumer
+      .apply(RefreshTokenMiddleware)
+      .forRoutes(
+        { path: 'auth/refresh-token', method: RequestMethod.POST },
+        { path: 'auth/logout', method: RequestMethod.POST })
+  }
 }

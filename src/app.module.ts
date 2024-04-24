@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
@@ -10,12 +10,14 @@ import { CommentsModule } from "./features/comments/api/comments.module";
 import { TestingModule } from "./features/testing/api/testing.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from 'path';
-import { JwtModule } from "@nestjs/jwt";
 import { AuthModule } from "./features/users/api/auth.module";
+import { CurrentUserIdPipe } from "./infrastructure/pipes/currentUserId.pipe";
+import { DevicesModule } from "./features/devices/api/devices.module";
+import { appConfig } from "./app.settings";
 
 @Module({
   controllers:[AppController],
-  providers:[],
+  providers:[CurrentUserIdPipe],
   imports:[
     UsersModule,
     BlogsModule,
@@ -23,22 +25,24 @@ import { AuthModule } from "./features/users/api/auth.module";
     CommentsModule,
     TestingModule,
     AuthModule,
-
+    DevicesModule,
 
     ConfigModule.forRoot({
       envFilePath:'.env'
     }),
+
+    MongooseModule.forRoot(appConfig.MongoURL),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
       serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
     }),
-    JwtModule.register({
-      secret:process.env.JWT_SECRET,
-      signOptions:{expiresIn:'5m'}
-    }),
 
-
-    MongooseModule.forRoot(process.env.MONGO_URL),
   ]
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+  consumer
+    .apply(CurrentUserIdPipe)
+    .forRoutes('*');
+}}

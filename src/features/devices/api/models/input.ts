@@ -55,25 +55,8 @@ export class loginUserDto {
   readonly password:string
 }
 
-export class UserDb {
-  readonly login:string;
-  readonly email:string;
-  readonly password:string;
-  readonly createdAt:Date;
-  readonly emailConfirmation:emailConfirmation
-}
-
-type emailConfirmation = {
-  confirmationCode:string
-  expirationDate:Date
-  isConfirmed:boolean
-}
-
-export type UsersQueryModel = {
-  searchEmailTerm:string
-  searchLoginTerm:string
-  sortBy?: string
-  sortDirection:SortDirection
-  pageNumber?:number
-  pageSize?:number
+export type DeleteDeviceModel = {
+  id:string
+  requestId:string
+  userId:string
 }

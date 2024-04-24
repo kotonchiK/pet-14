@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  Query, UseGuards,
+  Query, Req, UseGuards,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
@@ -21,6 +21,8 @@ import { OutputPostModel } from "../../posts/api/models/output";
 import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
+import { CurrentUserIdPipe } from "../../../infrastructure/pipes/currentUserId.pipe";
+import { Request } from "express";
 @Controller('/blogs')
 export class BlogsController {
   constructor(private blogsService:BlogsService,
@@ -47,8 +49,11 @@ export class BlogsController {
 
   @Get(':id/posts')
   @UsePipes(ValidationPipe)
+  @UsePipes(CurrentUserIdPipe)
   async getPostsForBlog(
     @Param('id', ValidateObjectId) id:string,
+    @Req() req:Request,
+
     @Query('sortBy') sortBy:string,
     @Query('sortDirection') sortDirection:SortDirection,
     @Query('pageNumber') pageNumber:number,
@@ -61,7 +66,7 @@ export class BlogsController {
       pageSize:pageSize
     }
 
-    return await this.blogsService.getPostsForBlog(query, '', id)
+    return await this.blogsService.getPostsForBlog(query, req.userId, id)
   }
 
   @Get(':id')

@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import * as process from "process";
+import { appConfig } from "../../app.settings";
 
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
@@ -26,7 +27,7 @@ export class BasicAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (login !== process.env.AUTH_LOGIN || password !== process.env.AUTH_PASSWORD) {
+    if (login !== appConfig.BasicLogin || password !== appConfig.BasicPass) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

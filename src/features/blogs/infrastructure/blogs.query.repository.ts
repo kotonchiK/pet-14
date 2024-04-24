@@ -10,7 +10,6 @@ import { blogsMapper } from "../../../infrastructure/mappers/blogs.mapper";
 export class BlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private blogModel:Model<BlogDocument>) {}
 
-
   async getBlogById(blogId:string):Promise<OutputBlogModel> {
     const blog = await this.blogModel.findById(new ObjectId(blogId))
 
