@@ -37,3 +37,28 @@ export const BlogFeature = {
   name:Blog.name,
   schema:BlogSchema
 }
+
+
+import { Model, Column, DataType, Table } from 'sequelize-typescript';
+
+@Table({tableName:'blogs'})
+export class BlogTest extends Model<BlogTest> {
+  @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true, unique:true })
+  id: number;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  name: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  description: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  websiteUrl: string;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt: Date;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  isMembership: boolean;
+}
+

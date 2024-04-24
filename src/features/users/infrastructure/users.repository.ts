@@ -1,80 +1,87 @@
-import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ObjectId } from "mongodb";
-import { User, UserDocument } from "../../../infrastructure/domains/schemas/users.schema";
+import {
+  EmailConfirmationTest,
+  User,
+  UserDocument,
+  UserTest
+} from "../../../infrastructure/domains/schemas/users.schema";
 import { CodeDto, UserDb } from "../api/models/input";
 import { randomUUID } from "node:crypto";
 import { add } from "date-fns";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
+import { InjectModel } from "@nestjs/sequelize";
+import { where } from "sequelize";
 
 export class UsersRepository {
-  constructor(@InjectModel(User.name) public userModel:Model<UserDocument>) {}
-  async createUser(newUser:UserDb):Promise<UserDocument | null> {
+  constructor(@InjectModel(UserTest) private readonly userModel: typeof UserTest,
+              @InjectModel(EmailConfirmationTest) private readonly emailConfirmationTest: typeof EmailConfirmationTest){}
+  async createUser(newUser:UserDb):Promise<UserTest | null> {
     try {
-      const createdUser = new this.userModel(newUser)
+      const emailConfirmation = await this.emailConfirmationTest.create(newUser.emailConfirmation)
+      const confId = emailConfirmation.id
+      const user = {
+        login:newUser.login,
+        email:newUser.email,
+        password:newUser.password,
+        createdAt:newUser.createdAt,
+        emailConfirmationId:confId
+      }
 
-      await createdUser.save()
-
-      return createdUser
-
+      return await this.userModel.create(user)
     } catch (error) {
-      if(error.code === 11000){
-        let fieldName = ''
-        if(error.keyPattern.login){
-          fieldName = 'login'
-        } else if (error.keyPattern.email) {
-              fieldName = 'email';
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        let fieldName = '';
+        if (error.fields && error.fields.login) {
+          fieldName = 'login';
+        } else if (error.fields && error.fields.email) {
+          fieldName = 'email';
         }
-        if(fieldName) {
-          throw new BadRequestException({message:`User with this ${fieldName} already exists`, field:fieldName})
+        if (fieldName) {
+          throw new BadRequestException({ message: `User with this ${fieldName} already exists`, field: fieldName });
         }
       }
-      console.log('Create-User error => ', error)
-      return null
+      console.log('Create-User error => ', error);
+      return null;
     }
   }
 
 
-  async deleteUser(id:string):Promise<boolean> {
+  async deleteUser(id:number):Promise<void> {
     try {
-      const isUserDeleted = await this.userModel.findByIdAndDelete(new ObjectId(id))
-      return !!isUserDeleted
+      const user = await this.userModel.findByPk(id)
+      await user.destroy()
     } catch (e) {
       console.log('Delete-User error => ', e)
-      return false
+      throw new NotFoundException()
     }
   }
 
    async emailConfirmation(code:CodeDto):Promise<boolean>{
     try{
-      const user = await this.userModel.findOne({"emailConfirmation.confirmationCode":code.code}).lean()
-      if(!user) return false
-      if(user.emailConfirmation.isConfirmed) return false
-      if(new Date() > user.emailConfirmation.expirationDate) return false
+      const userEmailConfirmation = await this.emailConfirmationTest.findOne({ where: { confirmationCode: code.code } });
+      if(!userEmailConfirmation) return false
+      if(userEmailConfirmation.isConfirmed) return false
+      if(new Date() > userEmailConfirmation.expirationDate) return false
 
-      const isConfirm = await this.userModel.findByIdAndUpdate(
-        {_id:user._id},
-        {$set:{"emailConfirmation.isConfirmed":true}})
+      const isConfirm = await userEmailConfirmation.update({ isConfirmed: true })
+
       return !!isConfirm
-
     } catch (error) {
       throw new BadRequestException({message:'Confirm problem', field:'code'})
     }
   }
 
-
-  async updateCodeConfirmationInfo(userId:string):Promise<string>{
+  async updateCodeConfirmationInfo(emailConfirmationId:number):Promise<string>{
     try {
       const confirmationCode = randomUUID()
       const expirationDate = add(new Date(), { hours: 1, minutes: 30, })
 
-      await this.userModel.findByIdAndUpdate({ _id: new ObjectId(userId) },
-        {
-          $set: {
-            "emailConfirmation.confirmationCode": confirmationCode,
-            "emailConfirmation.expirationDate": expirationDate
-          }
-        })
+      const uuu = await this.emailConfirmationTest.findByPk(emailConfirmationId)
+
+      await uuu.update({confirmationCode, expirationDate })
+
       return confirmationCode
     } catch (e) {
       console.log('Confirm code info was not updated')
@@ -82,5 +89,9 @@ export class UsersRepository {
     }
   }
 
+  async isEmailConfirm(id:number):Promise<void>{
+    const email = await this.emailConfirmationTest.findByPk(id)
 
+    if (email.isConfirmed) throw new BadRequestException({message:'Confirm problem', field:'email'})
+  }
 }

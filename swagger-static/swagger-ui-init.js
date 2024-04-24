@@ -11,12 +11,20 @@ window.onload = function() {
   "swaggerDoc": {
     "openapi": "3.0.0",
     "paths": {
-      "/users": {
+      "/sa/users": {
         "get": {
           "operationId": "UsersController_getUsers",
           "parameters": [
             {
               "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
               "required": true,
               "in": "query",
               "schema": {
@@ -82,7 +90,7 @@ window.onload = function() {
           }
         }
       },
-      "/users/{id}": {
+      "/sa/users/{id}": {
         "delete": {
           "operationId": "UsersController_deleteUser",
           "parameters": [
@@ -91,7 +99,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -108,6 +116,14 @@ window.onload = function() {
           "parameters": [
             {
               "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
               "required": true,
               "in": "query",
               "schema": {
@@ -174,11 +190,19 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             },
             {
               "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
               "required": true,
               "in": "query",
               "schema": {
@@ -216,7 +240,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -246,7 +270,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -264,7 +288,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -292,7 +316,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -309,6 +333,14 @@ window.onload = function() {
           "parameters": [
             {
               "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
               "required": true,
               "in": "query",
               "schema": {
@@ -360,18 +392,26 @@ window.onload = function() {
       },
       "/posts/{id}/comments": {
         "get": {
-          "operationId": "PostsController_getCommentsForPost",
+          "operationId": "PostsController_getCommentForPost",
           "parameters": [
             {
               "name": "id",
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             },
             {
               "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
               "required": true,
               "in": "query",
               "schema": {
@@ -400,6 +440,34 @@ window.onload = function() {
               "description": ""
             }
           }
+        },
+        "post": {
+          "operationId": "PostsController_createCommentForPost",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
         }
       },
       "/posts/{id}": {
@@ -411,7 +479,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -429,7 +497,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
@@ -457,10 +525,40 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/posts/{id}/like-status": {
+        "put": {
+          "operationId": "PostsController_setLikeStatus",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeStatusDto"
+                }
+              }
+            }
+          },
           "responses": {
             "204": {
               "description": ""
@@ -477,12 +575,88 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "type": "number"
               }
             }
           ],
           "responses": {
             "200": {
+              "description": ""
+            }
+          }
+        },
+        "put": {
+          "operationId": "CommentsController_updatedComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        },
+        "delete": {
+          "operationId": "CommentsController_deleteComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/comments/{id}/like-status": {
+        "put": {
+          "operationId": "CommentsController_setLikeStatus",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeStatusDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
               "description": ""
             }
           }
@@ -657,6 +831,46 @@ window.onload = function() {
             }
           }
         }
+      },
+      "/security/devices": {
+        "get": {
+          "operationId": "DevicesController_getDevices",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        },
+        "delete": {
+          "operationId": "DevicesController_deleteAllDevices",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/security/devices/{id}": {
+        "delete": {
+          "operationId": "DevicesController_deleteDevice",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
       }
     },
     "info": {
@@ -687,6 +901,14 @@ window.onload = function() {
           "properties": {}
         },
         "CreatePostDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "CreateCommentDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "LikeStatusDto": {
           "type": "object",
           "properties": {}
         },

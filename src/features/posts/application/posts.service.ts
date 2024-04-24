@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreatePostDto, PostDb, PostQueryModel } from "../api/models/input";
 import { PostsQueryRepository } from "../infrastructure/posts.query.repository";
 import { Pagination } from "../../../base/types/pagination.type";
@@ -8,6 +8,7 @@ import { BlogsQueryRepository } from "../../blogs/infrastructure/blogs.query.rep
 import { PostDocument } from "../../../infrastructure/domains/schemas/posts.schema";
 import { CommentsQueryRepository } from "../../comments/infrastructure/comments.query.repository";
 import { OutputCommentModel } from "../../comments/api/models/output";
+import { statusType } from "../../../base/models/likeStatusDto";
 
 @Injectable()
 export class PostsService {
@@ -16,7 +17,7 @@ export class PostsService {
               private blogQueryRepository:BlogsQueryRepository,
               private commentsQueryRepository:CommentsQueryRepository) {}
 
-  async deletePost(id:string):Promise<void> {
+  async deletePost(id:number):Promise<void> {
     const post = await this.postsQueryRepository.isPost(id)
 
     if(!post) throw new NotFoundException('Post is not exist')
@@ -25,7 +26,7 @@ export class PostsService {
   }
 
 
-  async getPostById(id:string, userId:string):Promise<OutputPostModel> {
+  async getPostById(id:number, userId:number):Promise<OutputPostModel> {
     const post = await this.postsQueryRepository.isPost(id)
 
     if(!post) throw new NotFoundException('Post is not exist')
@@ -34,10 +35,10 @@ export class PostsService {
   }
 
 
-  async createPost(dto:CreatePostDto, userId:string):Promise<OutputPostModel> {
+  async createPost(dto:CreatePostDto, userId:number):Promise<OutputPostModel> {
     const blog = await this.blogQueryRepository.isBlog(dto.blogId)
 
-    if(!blog) throw new NotFoundException('Blog is not exist')
+    if(!blog) throw new NotFoundException({message:'Blog is not exist'})
 
     const blogInfo = await this.blogQueryRepository.getBlogById(dto.blogId)
 
@@ -50,19 +51,19 @@ export class PostsService {
       blogName:blogInfo.name
     }
 
-    const createdPost:PostDocument = await this.postsRepository.createPost(postInfo)
+    const createdPost = await this.postsRepository.createPost(postInfo)
 
-    const postId = createdPost._id.toString()
+    const postId = createdPost.id
 
     return await this.postsQueryRepository.getPostById(postId, userId)
   }
 
 
-  async updatePostById(id:string, dto:CreatePostDto):Promise<void> {
+  async updatePostById(id:number, dto:CreatePostDto):Promise<void> {
 
     const blog = await this.blogQueryRepository.isBlog(dto.blogId)
 
-    if(!blog) throw new NotFoundException('Blog is not exist')
+    if(!blog) throw new BadRequestException({message:'Blog is not exist', field:'blogId'})
 
     const post = await this.postsQueryRepository.isPost(id)
 
@@ -71,32 +72,37 @@ export class PostsService {
     return await this.postsRepository.updatePost(id, dto)
   }
 
-  async getPosts(query:PostQueryModel, userId:string):Promise<Pagination<OutputPostModel>>{
+  async getPosts(query:PostQueryModel, userId:number):Promise<Pagination<OutputPostModel>>{
     const sortData = {
       sortBy:query.sortBy ?? "createdAt",
-      sortDirection:query.sortDirection ?? "desc",
+      sortDirection:query.sortDirection ?? "DESC",
       pageNumber:query.pageNumber ? +query.pageNumber : 1,
       pageSize:query.pageSize ? +query.pageSize : 10
     }
    return await this.postsQueryRepository.getAllPosts(sortData, userId)
   }
 
-  async getCommentsForPost(query:PostQueryModel, postId:string, userId:string):Promise<Pagination<OutputCommentModel>>{
+  async getCommentsForPost(query:PostQueryModel, postId:number, userId:number):Promise<Pagination<OutputCommentModel>>{
     const post = await this.postsQueryRepository.isPost(postId)
     if(!post) throw new NotFoundException('Post is not exist')
 
     const sortData = {
       sortBy:query.sortBy ?? "createdAt",
-      sortDirection:query.sortDirection ?? "desc",
+      sortDirection:query.sortDirection ?? "DESC",
       pageNumber:query.pageNumber ? +query.pageNumber : 1,
       pageSize:query.pageSize ? +query.pageSize : 10
     }
 
     return await this.commentsQueryRepository.getCommentsForPost(sortData, postId, userId)
 
+  }
+  async setLikeStatus(dto:statusType):Promise<void> {
+    const isPost = await this.postsQueryRepository.isPost(dto.id)
+    if(!isPost) throw new NotFoundException('Comment is not exist')
 
+    const likeStatus = await this.postsRepository.updateLikeStatus(dto)
 
-
+    if(!likeStatus) throw new BadRequestException({message:'Status was not updated', field:'likeStatus'})
   }
 
 }

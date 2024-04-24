@@ -3,9 +3,17 @@ import { UsersController } from "./users.controller";
 import { UsersService } from "../application/users.service";
 import { UsersQueryRepository } from "../infrastructure/users.query.repository";
 import { MongooseModule } from "@nestjs/mongoose";
-import { TokensFeature, UserFeature } from "../../../infrastructure/domains/schemas/users.schema";
+import {
+  EmailConfirmationTest,
+  TokensFeature,
+  TokensTest,
+  UserFeature,
+  UserTest
+} from "../../../infrastructure/domains/schemas/users.schema";
 import { UsersRepository } from "../infrastructure/users.repository";
 import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
+import { SequelizeModule } from "@nestjs/sequelize";
+import { BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
 
 @Module({
   controllers:[UsersController],
@@ -13,6 +21,9 @@ import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
   exports:[UsersRepository, UsersService, UsersQueryRepository],
   imports:[MongooseModule.forFeature([
     UserFeature, TokensFeature
-  ])]
+  ]),
+    SequelizeModule.forFeature([
+      UserTest, TokensTest, EmailConfirmationTest
+    ])]
 })
 export class UsersModule {}

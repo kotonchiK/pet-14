@@ -1,40 +1,46 @@
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { ObjectId } from "mongodb";
 import { Pagination } from "../../../base/types/pagination.type";
 import { OutputPostModel, postLikesInfo } from "../api/models/output";
-import { Post, PostDocument, PostLikes } from "../../../infrastructure/domains/schemas/posts.schema";
+import {
+  Post,
+  PostDocument,
+  PostLikes,
+  PostLikesTest,
+  PostTest
+} from "../../../infrastructure/domains/schemas/posts.schema";
 import { postMapper } from "../../../infrastructure/mappers/posts.mapper";
 import { PostQueryModel } from "../api/models/input";
+import { InjectModel } from "@nestjs/sequelize";
 
 export class PostsQueryRepository {
-  constructor(@InjectModel(Post.name) private postModel:Model<PostDocument>,
-              @InjectModel(PostLikes.name) private postLikesModel:Model<PostLikes>) {}
+  constructor(@InjectModel(PostTest) private postModel:typeof PostTest,
+              @InjectModel(PostLikesTest) private postLikesModel:typeof PostLikesTest) {}
 
-  async getPostById(postId:string, userId:string):Promise<OutputPostModel> {
-    const post = await this.postModel.findById(new ObjectId(postId))
+  async getPostById(postId:number, userId:number):Promise<OutputPostModel> {
+    const post = await this.postModel.findByPk(postId)
 
     const likesInfo = await this.postLikesInfo(postId, userId)
 
     return postMapper(post, likesInfo)
   }
 
-  async getAllPosts(sortData:PostQueryModel, userId:string):Promise<Pagination<OutputPostModel>> {
+  async getAllPosts(sortData:PostQueryModel, userId:number):Promise<Pagination<OutputPostModel>> {
     const {sortBy, sortDirection, pageNumber, pageSize} = sortData
-    const filter = {}
-    const posts = await this.postModel
-      .find(filter)
-      .sort({ [sortBy]: sortDirection })
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .lean()
-    const totalCount = await this.postModel.countDocuments(filter)
+    const filter: any = {};
+    const posts = await this.postModel.findAll({
+      where: filter,
+      order: [[sortBy, sortDirection]],
+      offset: (pageNumber - 1) * pageSize,
+      limit: pageSize,
+      raw: true,
+    });
+
+    const totalCount = await this.postModel.count({where:filter})
     const pagesCount = Math.ceil(totalCount / pageSize)
 
     let sortPost:OutputPostModel[] = []
     for(let i:number = 0; i < posts.length; i++){
       const post = posts[i]
-      const postLikesInfo:postLikesInfo = await this.postLikesInfo(post._id.toString(), userId)
+      const postLikesInfo:postLikesInfo = await this.postLikesInfo(post.id, userId)
       const sortedComment:OutputPostModel = postMapper(post, postLikesInfo)
       sortPost.push(sortedComment)
     }
@@ -48,22 +54,23 @@ export class PostsQueryRepository {
     }
   }
 
-  async getPostsForBlog(sortData:PostQueryModel, userId:string, blogId:string):Promise<Pagination<OutputPostModel>> {
+  async getPostsForBlog(sortData:PostQueryModel, userId:number, blogId:number):Promise<Pagination<OutputPostModel>> {
     const {sortBy, sortDirection, pageNumber, pageSize} = sortData
-    const filter = {blogId:blogId}
-    const posts = await this.postModel
-      .find(filter)
-      .sort({ [sortBy]: sortDirection })
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .lean()
-    const totalCount = await this.postModel.countDocuments(filter)
+    const filter = {"blogId":blogId}
+      const posts = await this.postModel.findAll({
+        where: filter,
+        order: [[sortBy, sortDirection]],
+        offset: (pageNumber - 1) * pageSize,
+        limit: pageSize,
+        raw: true,
+      });
+    const totalCount = await this.postModel.count({where:filter})
     const pagesCount = Math.ceil(totalCount / pageSize)
 
     let sortPost:OutputPostModel[] = []
     for(let i:number = 0; i < posts.length; i++){
       const post = posts[i]
-      const postLikesInfo:postLikesInfo = await this.postLikesInfo(post._id.toString(), userId)
+      const postLikesInfo:postLikesInfo = await this.postLikesInfo(post.id, userId)
       const sortedComment:OutputPostModel = postMapper(post, postLikesInfo)
       sortPost.push(sortedComment)
     }
@@ -77,8 +84,8 @@ export class PostsQueryRepository {
     }
   }
 
-  async postLikesInfo(postId: string, userId: string):Promise<postLikesInfo> {
-    const likesArray = await this.postLikesModel.find({postId:postId}).lean()
+  async postLikesInfo(postId: number, userId: number):Promise<postLikesInfo> {
+    const likesArray = await this.postLikesModel.findAll({where:{"postId":postId}})
     if(likesArray.length === 0) {
       return {
         likesCount: 0,
@@ -87,10 +94,8 @@ export class PostsQueryRepository {
         newestLikes:[]
       }
     }
-    const isUserId: string[] = userId.split('')
     let status = "None"
-
-    if(isUserId.length > 1) {
+    if(userId > 0) {
       const user = likesArray.map((like) =>  {
         if (like.userId === userId) return like
         else {
@@ -135,9 +140,8 @@ export class PostsQueryRepository {
     } as postLikesInfo
   }
 
-  async isPost(postId:string):Promise<boolean> {
-    const post = await this.postModel.findById(new ObjectId(postId))
+  async isPost(postId:number):Promise<boolean> {
+    const post = await this.postModel.findByPk(postId)
     return !!post
   }
-
 }

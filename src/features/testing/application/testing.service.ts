@@ -1,37 +1,38 @@
 import { Injectable } from "@nestjs/common";
-import { Model } from "mongoose";
-import { Blog, BlogDocument } from "../../../infrastructure/domains/schemas/blogs.schema";
-import { Post, PostDocument, PostLikes, PostLikesDocument } from "../../../infrastructure/domains/schemas/posts.schema";
-import { Comment, CommentDocument } from "../../../infrastructure/domains/schemas/comments.schema";
+import { BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
 import {
-  passwordChange,
-  passwordChangeDocument,
-  Tokens,
-  TokensDocument,
-  User,
-  UserDocument
+  PostLikesTest,
+  PostTest
+} from "../../../infrastructure/domains/schemas/posts.schema";
+import { CommentTest } from "../../../infrastructure/domains/schemas/comments.schema";
+import {
+  EmailConfirmationTest, passwordChangeTest,
+  TokensTest,
+UserTest
 } from "../../../infrastructure/domains/schemas/users.schema";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectModel } from "@nestjs/sequelize";
 
 @Injectable()
 export class TestingService {
-  constructor(@InjectModel(Blog.name) private blogModel:Model<BlogDocument>,
-              @InjectModel(Post.name) private postModel:Model<PostDocument>,
-              @InjectModel(Comment.name) private commentModel:Model<CommentDocument>,
-              @InjectModel(User.name) private userModel:Model<UserDocument>,
-              @InjectModel(PostLikes.name) private postLikesModel:Model<PostLikesDocument>,
-              @InjectModel(Tokens.name) private tokensModel:Model<TokensDocument>,
-              @InjectModel(passwordChange.name) private passwordChangeModel:Model<passwordChangeDocument>,
+  constructor(@InjectModel(BlogTest) private blogModel:typeof BlogTest,
+              @InjectModel(PostTest) private postModel:typeof PostTest,
+              @InjectModel(CommentTest) private commentModel:typeof CommentTest,
+              @InjectModel(UserTest) private userModel:typeof UserTest,
+              @InjectModel(PostLikesTest) private postLikesModel:typeof PostLikesTest,
+              @InjectModel(TokensTest) private tokensModel:typeof TokensTest,
+              @InjectModel(passwordChangeTest) private passwordChangeModel:typeof passwordChangeTest,
+              @InjectModel(EmailConfirmationTest) private emailConfirmationModel:typeof EmailConfirmationTest
 
 
   ) {}
   async deleteAllData():Promise<void>{
-    await this.blogModel.deleteMany()
-    await this.postModel.deleteMany()
-    await this.commentModel.deleteMany()
-    await this.userModel.deleteMany()
-    await this.postLikesModel.deleteMany()
-    await this.tokensModel.deleteMany()
-    await this.passwordChangeModel.deleteMany()
+    await this.blogModel.destroy({ where: {} });
+    await this.postModel.destroy({ where: {} });
+    await this.commentModel.destroy({ where: {} });
+    await this.userModel.destroy({ where: {} });
+    await this.postLikesModel.destroy({ where: {} });
+    await this.tokensModel.destroy({ where: {} });
+    await this.passwordChangeModel.destroy({ where: {} });
+    await this.emailConfirmationModel.destroy({ where: {} });
   }
 }

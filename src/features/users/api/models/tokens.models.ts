@@ -5,7 +5,7 @@ export type RefreshModel = {
 }
 
 export type refreshJwtModel = {
-  userId:string
+  userId:number
   ip:string
   deviceId:string
 }
@@ -17,18 +17,18 @@ export type DeleteDeviceModel = {
 }
 
 export type CreateTokenModel = {
-  userId:string
+  userId:number
   ip:string
   title:string
 }
 
 export type ReqRefData = {
-  userId: string
+  userId: number
   deviceId: string
 }
 
 export type DecodedRefreshToken = {
-  userId: string
+  userId: number
   deviceId: string
   iat:Date
 }

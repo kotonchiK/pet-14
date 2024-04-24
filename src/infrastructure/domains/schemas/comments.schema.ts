@@ -1,5 +1,6 @@
 import { HydratedDocument } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
 @Schema()
 export class Comment {
   @Prop({ required: true })
@@ -43,4 +44,31 @@ export const CommentSchema = SchemaFactory.createForClass(Comment)
 export const CommentFeature = {
   name:Comment.name,
   schema:CommentSchema
+}
+
+@Table({tableName:'comments'})
+export class CommentTest extends Model<CommentTest> {
+  @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true, unique:true })
+  id: number;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  content: string;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt: Date;
+
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  postId: number;
+
+  @Column({ type: DataType.JSON, allowNull: false })
+  commentatorInfo: {
+    userId: number;
+    userLogin: string;
+  };
+
+  @Column({ type: DataType.JSON, allowNull: false })
+  usersLikes: {
+    userId: number;
+    status: 'Like' | 'Dislike' | 'None';
+  }[];
 }

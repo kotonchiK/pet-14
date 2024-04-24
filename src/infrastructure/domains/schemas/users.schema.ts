@@ -1,5 +1,6 @@
 import { HydratedDocument } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 
 export type UserDocument = HydratedDocument<User>
 
@@ -90,3 +91,74 @@ export const passwordChangeFeature = {
   schema:passwordChangeSchema
 }
 
+@Table({ tableName: 'users' })
+export class UserTest extends Model<UserTest> {
+  @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true, unique: true })
+  id: number;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  login: string;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  email: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  password: string;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt: Date;
+
+  @ForeignKey(() => EmailConfirmationTest)
+  @Column({ type: DataType.INTEGER })
+  emailConfirmationId: number; // Внешний ключ к таблице email_confirmations
+}
+
+@Table({ tableName: 'email_confirmations' })
+export class EmailConfirmationTest extends Model<EmailConfirmationTest> {
+  @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
+  id: number;
+
+  @Column({ type: DataType.STRING, allowNull: false})
+  confirmationCode: string;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  expirationDate: Date;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+  isConfirmed: boolean;
+}
+
+@Table({ tableName: 'tokens' })
+export class TokensTest extends Model<TokensTest>{
+  @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true, unique: true })
+  id: number;
+
+  @ForeignKey(() => UserTest) // Устанавливаем внешний ключ к таблице пользователей
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  userId: number;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique:true})
+  deviceId: string;
+
+  @Column({ type: DataType.STRING, allowNull: false})
+  ip: string;
+
+  @Column({ type: DataType.STRING, allowNull: false})
+  title: string;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  iat: Date;
+}
+
+@Table({ tableName: 'passwordChange' })
+export class passwordChangeTest extends Model<passwordChangeTest> {
+  @Column({ type: DataType.STRING, allowNull: false})
+  email:string
+
+  @Column({ type: DataType.STRING, allowNull: false})
+  recoveryCode:string
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  expDate: Date;
+
+}

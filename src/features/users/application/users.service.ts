@@ -15,12 +15,8 @@ export class UsersService {
   constructor(private usersRepository:UsersRepository,
               private usersQueryRepository:UsersQueryRepository) {}
 
-  async deleteUser(id:string):Promise<boolean> {
-    const isUser = await this.usersQueryRepository.isUser(id)
-
-    if(!isUser) throw new NotFoundException
-
-    return await this.usersRepository.deleteUser(id)
+  async deleteUser(id:number):Promise<void> {
+    await this.usersRepository.deleteUser(id)
   }
   async createUser(dto:CreateUserDto):Promise<OutputUserModel> {
     const passwordSalt = await bcrypt.genSalt()
@@ -41,7 +37,7 @@ export class UsersService {
       }
     }
 
-    const createdUser:UserDocument = await this.usersRepository.createUser(userInfo)
+    const createdUser = await this.usersRepository.createUser(userInfo)
 
     return userMapper(createdUser)
   }
@@ -51,7 +47,7 @@ export class UsersService {
       searchLoginTerm:query.searchLoginTerm ?? null,
       searchEmailTerm:query.searchEmailTerm ?? null,
       sortBy:query.sortBy ?? "createdAt",
-      sortDirection:query.sortDirection ?? "desc",
+      sortDirection:query.sortDirection ?? "DESC",
       pageNumber:query.pageNumber ? +query.pageNumber : 1,
       pageSize:query.pageSize ? +query.pageSize : 10
     }
