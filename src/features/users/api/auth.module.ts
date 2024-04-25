@@ -4,10 +4,9 @@ import { UsersService } from "../application/users.service";
 import { UsersQueryRepository } from "../infrastructure/users.query.repository";
 import { MongooseModule } from "@nestjs/mongoose";
 import {
-  EmailConfirmationTest,
-  passwordChangeFeature, passwordChangeTest,
-  TokensFeature, TokensTest,
-  UserFeature, UserTest
+  passwordChangeFeature,
+  TokensFeature,
+  UserFeature
 } from "../../../infrastructure/domains/schemas/users.schema";
 import { UsersRepository } from "../infrastructure/users.repository";
 import { AuthService } from "../application/auth.service";
@@ -19,7 +18,6 @@ import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { JwtService } from "@nestjs/jwt";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
-import { SequelizeModule } from "@nestjs/sequelize";
 
 @Module({
   controllers:[AuthController],
@@ -35,10 +33,7 @@ import { SequelizeModule } from "@nestjs/sequelize";
     }]),
     MongooseModule.forFeature([
     UserFeature, TokensFeature, passwordChangeFeature
-  ]),
-    SequelizeModule.forFeature([
-      UserTest, TokensTest, passwordChangeTest, EmailConfirmationTest
-    ])]
+  ])]
 })
 export class AuthModule {
   configure(consumer) {

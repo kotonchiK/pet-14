@@ -7,8 +7,6 @@ import process from "process";
 import { useContainer } from "class-validator";
 import { AppModule } from "./app.module";
 import { configDotenv} from "dotenv";
-import { SequelizeModuleOptions } from '@nestjs/sequelize';
-import { BlogTest } from "./infrastructure/domains/schemas/blogs.schema";
 
 configDotenv()
 export const appConfig = {
@@ -26,25 +24,6 @@ export const appConfig = {
   MailPort_1: Number(process.env.MAIL_PORT1),
   MailFrom_1: process.env.MAIL_FROM1
 }
-
-const dbModels = [
-  BlogTest
-]
-
-export const databaseConfig: SequelizeModuleOptions = {
-  dialect: 'postgres',
-  host: process.env.DB_SQL_HOST,
-  port: Number(process.env.DB_SQL_PORT),
-  username: process.env.DB_SQL_USERNAME,
-  password: process.env.DB_SQL_PASSWORD,
-  database: process.env.DB_SQL_DATABASE,
-  autoLoadModels:true,
-  synchronize:true,
-  models:[...dbModels],
-  define: {
-    timestamps: false,
-  },
-};
 
 export const appSettings = (app:INestApplication) => {
   app.enableCors()

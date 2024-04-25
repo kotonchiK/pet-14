@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { CodeDto, CreateUserDto, loginUserDto, MailDto, NewPasswordDto, UserDb } from "../api/models/input";
 import {
   passwordChange,
-  passwordChangeDocument, passwordChangeTest,
+  passwordChangeDocument,
   Tokens,
-  TokensDocument, TokensTest, User, UserDocument, UserTest
+  TokensDocument, User, UserDocument
 } from "../../../infrastructure/domains/schemas/users.schema";
 import { UsersQueryRepository } from "../infrastructure/users.query.repository";
 import { UsersRepository } from "../infrastructure/users.repository";
@@ -13,10 +13,15 @@ import { UsersService } from "./users.service";
 import { add } from "date-fns";
 import { JwtAuthService } from "./jwt.service";
 import { ReqRefData, TokensTypes } from "../api/models/tokens.models";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import bcrypt from 'bcryptjs'
 import { EmailManager } from "../../../infrastructure/email/email.manager";
 import { UserMeInfoType } from "../api/models/output";
-import { InjectModel } from "@nestjs/sequelize";
+
+
+
+
 @Injectable()
 export class AuthService {
   constructor(private usersRepository: UsersRepository,
@@ -24,9 +29,9 @@ export class AuthService {
               private usersService:UsersService,
               private emailManager:EmailManager,
               private jwtService:JwtAuthService,
-              @InjectModel(TokensTest) private tokensModel:typeof TokensTest,
-              @InjectModel(passwordChangeTest) private passwordChangeModel:typeof passwordChangeTest,
-              @InjectModel(UserTest) private userModel:typeof UserTest
+              @InjectModel(Tokens.name) private tokensModel:Model<TokensDocument>,
+              @InjectModel(passwordChange.name) private passwordChangeModel:Model<passwordChangeDocument>,
+              @InjectModel(User.name) private userModel:Model<UserDocument>
 
   ) {
   }
@@ -94,13 +99,14 @@ export class AuthService {
    async emailResending(email:MailDto):Promise<void> {
     const user = await this.usersQueryRepository.findByEmail(email)
 
-     const emailConfirmationId = user.emailConfirmationId
+    if (user.emailConfirmation.isConfirmed) throw new BadRequestException({message:'Confirm problem', field:'email'})
 
-     await this.usersRepository.isEmailConfirm(emailConfirmationId)
+    const userId = (user._id).toString()
 
-     const confirmationCode = await this.usersRepository.updateCodeConfirmationInfo(emailConfirmationId)
+     const confirmationCode = await this.usersRepository.updateCodeConfirmationInfo(userId)
 
      if(!confirmationCode) throw new BadRequestException({message:'Confirm problem', field:'code'})
+
      try {
       await this.emailManager.sendEmailConfirmationCode(user.email, confirmationCode)
     }catch (e){
@@ -112,7 +118,11 @@ export class AuthService {
   async refreshTokenAuthorization(token:string):Promise<ReqRefData | null> {
     const refreshToken = await this.jwtService.getRefToken(token)
 
-    await this.usersQueryRepository.checkList(refreshToken)
+    if (!refreshToken) throw new UnauthorizedException('Refresh token is false')
+
+    const isWhite = await this.usersQueryRepository.checkList(refreshToken)
+
+    if (!isWhite) throw new UnauthorizedException('Refresh token is not in white list')
 
     return {
       userId: refreshToken.userId,
@@ -120,19 +130,17 @@ export class AuthService {
     }
   };
 
-  async logout(userId:number, deviceId:string):Promise<void>{
+  async logout(userId:string, deviceId:string):Promise<void>{
     const filter = {
       "userId":userId,
       "deviceId":deviceId
     }
-    try {
-      const token = await this.tokensModel.findOne({where:filter})
-      await token.destroy()
-    } catch (e) {
-      throw new NotFoundException('')
-    }
-    const isToken = await this.tokensModel.findOne({where:filter})
+
+    await this.tokensModel.deleteOne(filter)
+
+    const isToken = await this.tokensModel.findOne(filter)
     if(isToken) throw new UnauthorizedException('tokens expaired or noch etwas')
+
   }
 
   async passwordRecovery(email:MailDto):Promise<void> {
@@ -156,25 +164,26 @@ export class AuthService {
 
   }
 
-  async newPassword(dto:NewPasswordDto):Promise<void>{
+  async newPassword(dto:NewPasswordDto){
 
-    const isCode = await this.passwordChangeModel.findOne({where:{"recoveryCode":dto.recoveryCode}})
+    const isCode = await this.passwordChangeModel.findOne({"recoveryCode":dto.recoveryCode}).lean()
 
     if(!isCode) throw new BadRequestException({message:'Code was not founden', field:'recoveryCode'})
 
     if(new Date() > isCode.expDate) throw new BadRequestException({message:'Code was not founden', field:'recoveryCode'})
 
-    await isCode.destroy()
+    await this.passwordChangeModel.deleteOne({"recoveryCode":dto.recoveryCode})
 
     const passwordSalt = await bcrypt.genSalt()
     const passwordHash = await this.usersService._generateHash(dto.newPassword, passwordSalt)
 
-    const user = await this.userModel.findOne({where:{"email":isCode.email}})
-
-    await user.update({password:passwordHash})
-
+    await this.userModel.updateOne(
+      {"email":isCode.email},
+      {$set:{
+          password:passwordHash
+        }})
   }
-  async refreshingTokens(userId:number, deviceId:string, ip:string):Promise<TokensTypes>{
+  async refreshingTokens(userId:string, deviceId:string, ip:string):Promise<TokensTypes>{
     const user = await this.usersQueryRepository.isUser(userId)
 
     if (!user) throw new UnauthorizedException('User is not exist')
@@ -192,7 +201,7 @@ export class AuthService {
     }
   }
 
-  async userInfo(userId:number):Promise<UserMeInfoType> {
+  async userInfo(userId:string):Promise<UserMeInfoType> {
 
     const user = await this.usersQueryRepository.getUser(userId)
     if(!user) throw new NotFoundException('User is not exist')
@@ -204,6 +213,7 @@ export class AuthService {
     }
 
   }
+
 
 
 }
