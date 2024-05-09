@@ -125,7 +125,7 @@ export class PostsQueryRepository {
       if(sortedPost2[i] !== undefined) {
 
         const like = {
-          userId:sortedPost2[i].userId,
+          userId:sortedPost2[i].userId.toString(),
           login:sortedPost2[i].login,
           addedAt:sortedPost2[i].addedAt.toISOString()
         }

@@ -13,7 +13,6 @@ import {
 } from "@nestjs/common";
 import { CommentsService } from "../application/comments.service";
 import { OutputCommentModel } from "./models/output";
-import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { CreateCommentDto } from "./models/input";
 import { Request } from "express";

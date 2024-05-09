@@ -1,33 +1,30 @@
 import {
-  BadRequestException,
   Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode, HttpStatus,
-  Param,
+  Controller, Delete,
+  Get, HttpCode, HttpStatus, NotFoundException,
+  Param, ParseIntPipe,
   Post,
   Put,
-  Query, Req, UseGuards,
+  Query,
+  Req,
+  UseGuards,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
 import { BlogsService } from "../application/blogs.service";
-import { OutputBlogModel } from "./models/output";
-import { SortDirection } from "mongodb";
-import { Pagination } from "../../../base/types/pagination.type";
-import { CreateBlogDto, CreatePostBlogDto, SqlSortDirection } from "./models/input";
 import { PostsService } from "../../posts/application/posts.service";
-import { OutputPostModel } from "../../posts/api/models/output";
-import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
-import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
-import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
+import { Pagination } from "../../../base/types/pagination.type";
+import { OutputBlogModel } from "./models/output";
 import { CurrentUserIdPipe } from "../../../infrastructure/pipes/currentUserId.pipe";
-import { Request } from "express";
-import { isNumber } from "class-validator";
 import { ValidateIdPipe } from "../../../infrastructure/pipes/ValidateIdNumber";
-@Controller('blogs')
-export class BlogsController {
+import { Request } from "express";
+import { OutputPostModel } from "../../posts/api/models/output";
+import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
+import { CreateBlogDto, CreatePostBlogDto } from "./models/input";
+
+@Controller('sa/blogs')
+@UseGuards(BasicAuthGuard)
+export class BlogsSaController {
   constructor(private blogsService:BlogsService,
               private postsService:PostsService) {}
 
@@ -39,7 +36,7 @@ export class BlogsController {
     @Query('pageNumber') pageNumber:number,
     @Query('pageSize') pageSize:number,
     @Query('searchNameTerm') searchNameTerm:string,
-    ):Promise<Pagination<OutputBlogModel>>{
+  ):Promise<Pagination<OutputBlogModel>>{
       const query = {
         sortBy:sortBy,
         sortDirection:sortDirection,
@@ -47,9 +44,7 @@ export class BlogsController {
         pageSize:pageSize,
         searchNameTerm:searchNameTerm,
       }
-
       return await this.blogsService.getBlogs(query)
-
   }
 
   @Get(':id/posts')
@@ -123,10 +118,17 @@ export class BlogsController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostForBlogById(
-    @Param('blogId', ValidateIdPipe) blogId:number,
-    @Param('postId', ValidateIdPipe) postId:number,
+    @Param('blogId', ParseIntPipe) blogId:number,
+    @Param('postId', ParseIntPipe) postId:number,
     @Body() dto:CreatePostBlogDto):Promise<void>{
-    return await this.postsService.updatePostById(postId, {...dto, blogId})
+
+    const info = {
+      title:dto.title,
+      shortDescription:dto.shortDescription,
+      content:dto.content,
+      blogId:blogId
+    }
+    return await this.postsService.updatePostById2(postId, info)
   }
 
   @Delete(':blogId/posts/:postId')
@@ -134,10 +136,12 @@ export class BlogsController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePostForBlogById(
-    @Param('blogId', ValidateIdPipe) blogId:number,
-    @Param('postId', ValidateIdPipe) postId:number,):Promise<void> {
+    @Param('blogId', ParseIntPipe) blogId:number,
+    @Param('postId', ParseIntPipe) postId:number,):Promise<void> {
+
     await this.blogsService.getBlogById(blogId)
     return await this.postsService.deletePost(postId)
   }
 
 }
+

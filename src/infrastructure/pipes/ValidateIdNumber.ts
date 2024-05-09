@@ -1,5 +1,4 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException, NotFoundException } from "@nestjs/common";
-
+import { PipeTransform, Injectable, ArgumentMetadata, NotFoundException } from "@nestjs/common";
 @Injectable()
 export class ValidateIdPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {

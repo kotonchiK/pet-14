@@ -13,7 +13,7 @@ export class JwtAuthService {
   constructor(@InjectModel(TokensTest) public tokenModel:typeof TokensTest) {}
 
   async createAccessJWT(userId: number): Promise<string> {
-    return jwt.sign({ userId }, appConfig.Access_Secret_Key, { expiresIn: '10s' });
+    return jwt.sign({ userId }, appConfig.Access_Secret_Key, { expiresIn: '10m' });
   }
 
   async createRefreshJWT(data: CreateTokenModel): Promise<string> {

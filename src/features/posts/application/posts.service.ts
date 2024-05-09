@@ -58,6 +58,19 @@ export class PostsService {
     return await this.postsQueryRepository.getPostById(postId, userId)
   }
 
+  async updatePostById2(id:number, dto:CreatePostDto):Promise<void> {
+
+    const blog = await this.blogQueryRepository.isBlog(dto.blogId)
+
+    if(!blog) throw new NotFoundException({message:'Blog is not exist', field:'blogId'})
+
+    const post = await this.postsQueryRepository.isPost(id)
+
+    if(!post) throw new NotFoundException('Post is not found')
+
+    return await this.postsRepository.updatePost(id, dto)
+  }
+
 
   async updatePostById(id:number, dto:CreatePostDto):Promise<void> {
 

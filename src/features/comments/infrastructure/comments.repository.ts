@@ -46,6 +46,7 @@ export class CommentsRepository {
   async deleteComment(id:number):Promise<void>{
     try {
       const comment = await this.commentModel.findByPk(id)
+      await comment.destroy()
     } catch (error) {
       console.log({
         'Error by delete comment => ':error,

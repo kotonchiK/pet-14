@@ -24,6 +24,10 @@ export const appConfig = {
   MailPort_1: Number(process.env.MAIL_PORT1),
   MailFrom_1: process.env.MAIL_FROM1
 }
+export const AuthThrottlerSettings = [{
+  ttl: 10_000,
+  limit: 1000000000,
+}]
 
 export const appSettings = (app:INestApplication) => {
   app.enableCors()

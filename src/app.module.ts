@@ -13,10 +13,8 @@ import { join } from 'path';
 import { AuthModule } from "./features/users/api/auth.module";
 import { CurrentUserIdPipe } from "./infrastructure/pipes/currentUserId.pipe";
 import { DevicesModule } from "./features/devices/api/devices.module";
-import { appConfig, databaseConfig } from "./app.settings";
-import { User } from "./infrastructure/domains/schemas/users.schema";
+import { appConfig } from "./app.settings";
 import { SequelizeModule } from "@nestjs/sequelize";
-import { BlogTest } from "./infrastructure/domains/schemas/blogs.schema";
 
 @Module({
   controllers:[AppController],
@@ -34,7 +32,19 @@ import { BlogTest } from "./infrastructure/domains/schemas/blogs.schema";
       envFilePath:'.env'
     }),
 
-    SequelizeModule.forRoot(databaseConfig),
+  SequelizeModule.forRoot({
+    dialect: 'postgres',
+    host: process.env.DB_SQL_HOST,
+    port: Number(process.env.DB_SQL_PORT),
+    username: process.env.DB_SQL_USERNAME,
+    password: process.env.DB_SQL_PASSWORD,
+    database: process.env.DB_SQL_DATABASE,
+    synchronize:true,
+    autoLoadModels:true,
+    define:{
+      timestamps:false
+    }
+  }),
 
     MongooseModule.forRoot(appConfig.MongoURL),
 

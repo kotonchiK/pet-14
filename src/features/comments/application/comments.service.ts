@@ -44,7 +44,7 @@ export class CommentsService {
     const comment = await this.commentsQueryRepository.getCommentById(commentId, userId)
     if(!comment) throw new NotFoundException('Comment is not exist')
 
-    if(userId !== Number(comment.commentatorInfo.userId)) throw new ForbiddenException('the comment does not belong to the user')
+    if(Number(userId) !== Number(comment.commentatorInfo.userId)) throw new ForbiddenException('the comment does not belong to the user')
 
     await this.commentRepository.updateComment(commentId, content)
   }
@@ -53,7 +53,7 @@ export class CommentsService {
     const comment = await this.commentsQueryRepository.getCommentById(commentId, userId)
     if(!comment) throw new NotFoundException('Comment is not exist')
 
-    if(userId !== Number(comment.commentatorInfo.userId)) throw new ForbiddenException('the comment does not belong to the user')
+    if(Number(userId) !== Number(comment.commentatorInfo.userId)) throw new ForbiddenException('the comment does not belong to the user')
 
     await this.commentRepository.deleteComment(commentId)
   }

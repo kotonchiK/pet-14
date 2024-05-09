@@ -1,5 +1,6 @@
 import { IsString, IsUrl, Length } from "class-validator";
 import { IsTrim } from "../../../../infrastructure/decorators/isTrim";
+import { IsNumeric } from "sequelize-typescript";
 
 export class CreateBlogDto  {
   @IsTrim({message:'trim'})

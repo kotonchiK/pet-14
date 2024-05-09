@@ -6,7 +6,7 @@ import { OutputBlogModel } from "../api/models/output";
 import { Blog, BlogDocument, BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
 import { blogsMapper, blogsMapper2 } from "../../../infrastructure/mappers/blogs.mapper";
 import { InjectModel } from "@nestjs/sequelize";
-import { OrderItem } from 'sequelize';
+import { Op, OrderItem } from "sequelize";
 
 
 export class BlogsQueryRepository {
@@ -22,7 +22,9 @@ export class BlogsQueryRepository {
     const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = sortData
     const filter: any = {};
     if (searchNameTerm) {
-      filter.name = { $like: `%${searchNameTerm}%` };
+      filter.name = {
+        [Op.iLike]: `%${searchNameTerm}%`,
+      };
     }
 
     const blogs = await this.blogModel.findAll({

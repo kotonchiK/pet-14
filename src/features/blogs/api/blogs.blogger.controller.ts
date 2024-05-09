@@ -1,33 +1,29 @@
 import {
-  BadRequestException,
   Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode, HttpStatus,
+  Controller, Delete,
+  Get, HttpCode, HttpStatus,
   Param,
   Post,
   Put,
-  Query, Req, UseGuards,
+  Query,
+  Req,
+  UseGuards,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
-import { BlogsService } from "../application/blogs.service";
-import { OutputBlogModel } from "./models/output";
-import { SortDirection } from "mongodb";
-import { Pagination } from "../../../base/types/pagination.type";
-import { CreateBlogDto, CreatePostBlogDto, SqlSortDirection } from "./models/input";
-import { PostsService } from "../../posts/application/posts.service";
-import { OutputPostModel } from "../../posts/api/models/output";
-import { ValidateObjectId } from "../../../infrastructure/pipes/ValidateObjectId";
-import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
+import { BlogsService } from "../application/blogs.service";
+import { PostsService } from "../../posts/application/posts.service";
+import { Pagination } from "../../../base/types/pagination.type";
+import { OutputBlogModel } from "./models/output";
 import { CurrentUserIdPipe } from "../../../infrastructure/pipes/currentUserId.pipe";
-import { Request } from "express";
-import { isNumber } from "class-validator";
 import { ValidateIdPipe } from "../../../infrastructure/pipes/ValidateIdNumber";
-@Controller('blogs')
-export class BlogsController {
+import { Request } from "express";
+import { OutputPostModel } from "../../posts/api/models/output";
+import { CreateBlogDto, CreatePostBlogDto } from "./models/input";
+
+@Controller('blogger/blogs')
+export class BlogsBloggerController {
   constructor(private blogsService:BlogsService,
               private postsService:PostsService) {}
 
@@ -39,7 +35,7 @@ export class BlogsController {
     @Query('pageNumber') pageNumber:number,
     @Query('pageSize') pageSize:number,
     @Query('searchNameTerm') searchNameTerm:string,
-    ):Promise<Pagination<OutputBlogModel>>{
+  ):Promise<Pagination<OutputBlogModel>>{
       const query = {
         sortBy:sortBy,
         sortDirection:sortDirection,
@@ -47,7 +43,6 @@ export class BlogsController {
         pageSize:pageSize,
         searchNameTerm:searchNameTerm,
       }
-
       return await this.blogsService.getBlogs(query)
 
   }
@@ -124,6 +119,7 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostForBlogById(
     @Param('blogId', ValidateIdPipe) blogId:number,
+    //@Param('blogId') blogId: IdInputModel,
     @Param('postId', ValidateIdPipe) postId:number,
     @Body() dto:CreatePostBlogDto):Promise<void>{
     return await this.postsService.updatePostById(postId, {...dto, blogId})

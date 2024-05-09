@@ -21,9 +21,11 @@ import { JwtAuthService } from "../../users/application/jwt.service";
 import { UsersQueryRepository } from "../../users/infrastructure/users.query.repository";
 import { TokensFeature, TokensTest, UserFeature, UserTest } from "../../../infrastructure/domains/schemas/users.schema";
 import { SequelizeModule } from "@nestjs/sequelize";
+import { BlogsBloggerController } from "./blogs.blogger.controller";
+import { BlogsSaController } from "./blogs.sa.controller";
 
 @Module({
-  controllers:[BlogsController],
+  controllers:[BlogsController, BlogsBloggerController, BlogsSaController ],
   providers:[BlogsRepository, BlogsService, BlogsQueryRepository, PostsQueryRepository, PostsService, PostsRepository, CommentsQueryRepository, JwtAuthGuard, JwtAuthService, UsersQueryRepository],
   exports:[BlogsRepository, BlogsService, BlogsQueryRepository, PostsQueryRepository, PostsService, PostsRepository, CommentsQueryRepository],
   imports:[MongooseModule.forFeature([
