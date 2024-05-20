@@ -1,19 +1,14 @@
-import { Model } from "mongoose";
-import {
-  Comment,
-  CommentDocument,
-  CommentsLikes,
-  CommentTest
-} from "../../../infrastructure/domains/schemas/comments.schema";
-import { OutputUserModel } from "../../users/api/models/output";
-import { ObjectId } from "mongodb";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { statusType } from "../../../base/models/likeStatusDto";
-import { InjectModel } from "@nestjs/sequelize";
+import { BadRequestException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CommentsEntity, CommentsLikesEntity } from "../domains/comments.entity";
+import { statusType } from "../../../../base/models/likeStatusDto";
+import { OutputUserModel } from "../../../users/api/models/output";
 
-export class CommentsRepository {
-  constructor(@InjectModel(CommentTest) private commentModel:typeof CommentTest,
-              @InjectModel(CommentsLikes) private commentsLikesModel:typeof CommentsLikes) {}
+export class CommentsRepository_TYPEORM {
+  constructor(@InjectRepository(CommentsEntity) private commentsRepository:Repository<CommentsEntity>,
+              @InjectRepository(CommentsLikesEntity) private commentsLikesRepository:Repository <CommentsLikesEntity>,
+              ) {}
 
   async createComment(postId:number, user:OutputUserModel, dto:string):Promise<number|null>{
     try {
@@ -26,7 +21,7 @@ export class CommentsRepository {
         createdAt: new Date(),
         postId: postId,
       }
-      const comment = await this.commentModel.create(InputData)
+      const comment = await this.commentsRepository.save(InputData)
       return comment.id
     } catch (error) {
       console.log(error)
@@ -36,9 +31,9 @@ export class CommentsRepository {
 
   async updateComment(id:number, content:string):Promise<void> {
     try {
-      const comment = await this.commentModel.findByPk(id)
-
-      await comment.update({"content":content})
+      const comment = await this.commentsRepository.findOne({where:{id:id}})
+      comment.content = content
+      await this.commentsRepository.save(comment)
     } catch (error) {
       console.log({
         'Error by update comment => ':error,
@@ -50,8 +45,8 @@ export class CommentsRepository {
 
   async deleteComment(id:number):Promise<void>{
     try {
-      const comment = await this.commentModel.findByPk(id)
-      await comment.destroy()
+      const comment = await this.commentsRepository.findOne({where:{id:id}})
+      await this.commentsRepository.remove(comment)
     } catch (error) {
       console.log({
         'Error by delete comment => ':error,
@@ -62,10 +57,10 @@ export class CommentsRepository {
   }
   async updateLikeStatus(data:statusType):Promise<boolean>{
     try {
-      const comment = await this.commentModel.findByPk(data.id)
+      const comment = await this.commentsRepository.findOne({where:{id:data.id}})
       if(!comment) return false
 
-      const obWarUser = await this.commentsLikesModel.findOne({where:{commentId:data.id, userId:data.userId}})
+      const obWarUser = await this.commentsLikesRepository.findOne({where:{commentId:data.id, userId:data.userId}})
 
       // юзера нет
       if(!obWarUser) {
@@ -74,11 +69,10 @@ export class CommentsRepository {
           userId: data.userId,
           status: data.status
         };
-        await this.commentsLikesModel.create(newUserLike)
-        console.log(comment)
+        await this.commentsLikesRepository.save(newUserLike)
       } else {
         obWarUser.status = data.status;
-        await obWarUser.save()
+        await this.commentsLikesRepository.save(obWarUser)
       }
 
       return true

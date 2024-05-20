@@ -9,13 +9,17 @@ import { PostDocument } from "../../../infrastructure/domains/schemas/posts.sche
 import { CommentsQueryRepository } from "../../comments/infrastructure/comments.query.repository";
 import { OutputCommentModel } from "../../comments/api/models/output";
 import { statusType } from "../../../base/models/likeStatusDto";
+import { PostsRepository_TYPEORM } from "../infrastructure/typeORM/posts.repository";
+import { PostsQueryRepository_TYPEORM } from "../infrastructure/typeORM/posts.query.repository";
+import { BlogsQueryRepository_TYPEORM } from "../../blogs/infrastructure/typeORM-repositories/blogs.query.repository";
+import { CommentsQueryRepository_TYPEORM } from "../../comments/infrastructure/typeORM/comments.query.repository";
 
 @Injectable()
 export class PostsService {
-  constructor(private postsRepository:PostsRepository,
-              private postsQueryRepository:PostsQueryRepository,
-              private blogQueryRepository:BlogsQueryRepository,
-              private commentsQueryRepository:CommentsQueryRepository) {}
+  constructor(private postsRepository:PostsRepository_TYPEORM,
+              private postsQueryRepository:PostsQueryRepository_TYPEORM,
+              private blogQueryRepository:BlogsQueryRepository_TYPEORM,
+              private commentsQueryRepository:CommentsQueryRepository_TYPEORM) {}
 
   async deletePost(id:number):Promise<void> {
     const post = await this.postsQueryRepository.isPost(id)

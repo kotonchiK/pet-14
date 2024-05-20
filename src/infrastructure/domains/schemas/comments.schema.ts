@@ -1,6 +1,8 @@
 import { HydratedDocument } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { UserTest } from "./users.schema";
+import { PostTest } from "./posts.schema";
 @Schema()
 export class Comment {
   @Prop({ required: true })
@@ -60,15 +62,31 @@ export class CommentTest extends Model<CommentTest> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   postId: number;
 
+  // TODO разделить
   @Column({ type: DataType.JSON, allowNull: false })
   commentatorInfo: {
     userId: number;
     userLogin: string;
   };
+}
 
-  @Column({ type: DataType.JSON, allowNull: false })
-  usersLikes: {
-    userId: number;
-    status: 'Like' | 'Dislike' | 'None';
-  }[];
+@Table({tableName:'commentsLikes'})
+export class CommentsLikes extends Model<CommentsLikes> {
+  @Column({ type: DataType.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true, unique:true })
+  id: number;
+
+  @Column({
+    type: DataType.ENUM('Like', 'Dislike', 'None'),
+    allowNull: false,
+    defaultValue: 'None'
+  })
+  status: string;
+
+  @ForeignKey(() => CommentTest)
+  @Column({ type: DataType.INTEGER })
+  commentId: number;
+
+  @ForeignKey(() => UserTest)
+  @Column({ type: DataType.INTEGER })
+  userId: number;
 }

@@ -1,7 +1,8 @@
 import { PostDocument, PostTest } from "../domains/schemas/posts.schema";
 import { OutputPostModel, postLikesInfo } from "../../features/posts/api/models/output";
+import { PostsEntity } from "../../features/posts/infrastructure/domains/posts.entity";
 
-export const postMapper = (post:PostTest, postLikesInfo:postLikesInfo):OutputPostModel => {
+export const postMapper = (post:PostTest | PostsEntity, postLikesInfo:postLikesInfo):OutputPostModel => {
   return {
     id:post.id.toString(),
     title:post.title,

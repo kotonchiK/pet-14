@@ -1,36 +1,26 @@
-import { Model } from "mongoose";
-import { ObjectId } from "mongodb";
-import {  OutputCommentModel } from "../api/models/output";
-import {
-  Comment,
-  CommentDocument,
-  CommentsLikes,
-  CommentTest
-} from "../../../infrastructure/domains/schemas/comments.schema";
-import { commentMapper } from "../../../infrastructure/mappers/comments.mapper";
-import { PostQueryModel } from "../../posts/api/models/input";
-import { Pagination } from "../../../base/types/pagination.type";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CommentsEntity, CommentsLikesEntity } from "../domains/comments.entity";
+import { OutputCommentModel } from "../../api/models/output";
 import { NotFoundException } from "@nestjs/common";
-import { statusType } from "../../../base/models/likeStatusDto";
-import { InjectModel } from "@nestjs/sequelize";
+import { commentMapper } from "../../../../infrastructure/mappers/comments.mapper";
+import { PostQueryModel } from "../../../posts/api/models/input";
+import { Pagination } from "../../../../base/types/pagination.type";
 
-export class CommentsQueryRepository {
-  constructor(@InjectModel(CommentTest) private commentModel:typeof CommentTest,
-              @InjectModel(CommentsLikes) private commentsLikesModel:typeof CommentsLikes) {}
-
+export class CommentsQueryRepository_TYPEORM {
+  constructor(
+    @InjectRepository(CommentsEntity) private commentsRepository:Repository<CommentsEntity>,
+    @InjectRepository(CommentsLikesEntity) private commentsLikesRepository:Repository<CommentsLikesEntity> ) {}
 
   async getCommentsForPost(sortData:PostQueryModel, postId:number, userId:number):Promise<Pagination<OutputCommentModel>>{
     const {sortBy, sortDirection, pageNumber, pageSize} = sortData
-    const filter = {"postId":postId}
-    const comments = await this.commentModel.findAll({
-      where: filter,
-      order: [[sortBy, sortDirection]],
-      offset: (pageNumber - 1) * pageSize,
-      limit: pageSize,
-      raw: true,
-    });
 
-    const totalCount:number = await this.commentModel.count({where:filter})
+    const [comments, totalCount] = await this.commentsRepository.findAndCount({
+      where: { postId },
+      order: { [sortBy]: sortDirection },
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+    });
     const pagesCount:number = Math.ceil(totalCount / pageSize)
 
     let sortComments:OutputCommentModel[] = []
@@ -52,7 +42,7 @@ export class CommentsQueryRepository {
 
 
   async getCommentById(commentId:number, userId:number):Promise<OutputCommentModel> {
-    const comment = await this.commentModel.findByPk(commentId)
+    const comment = await this.commentsRepository.findOne({where:{id:commentId}})
     if(!comment) throw new NotFoundException('Comment is not exist')
     const likesInfo = await this.likesInfo(commentId, userId)
 
@@ -60,7 +50,7 @@ export class CommentsQueryRepository {
   }
 
    async likesInfo(commentId:number, userId: number):Promise<likesInfo> {
-     const likesArray = await this.commentsLikesModel.findAll({where:{commentId:commentId}})
+     const likesArray = await this.commentsLikesRepository.find({where:{commentId:commentId}})
      if(likesArray.length === 0) {
       return {
         likesCount: 0,
@@ -99,17 +89,14 @@ export class CommentsQueryRepository {
 
   async isComment(commentId: number): Promise<boolean> {
     try {
-      const comment = await this.commentModel.findByPk(commentId);
+      const comment = await this.commentsRepository.findOne({where:{id:commentId}});
       return !!comment;
     } catch (error) {
       console.log(`Error while checking blog: ${error}`);
       return false;
     }
   }
-
-
 }
-
 
 export type likesInfo = {
   likesCount:number

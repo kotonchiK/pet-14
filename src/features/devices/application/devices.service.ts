@@ -2,11 +2,13 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 import { DevicesQueryRepository } from "../infrastructure/devices.query.repository";
 import { DevicesRepository } from "../infrastructure/devices.repository";
 import { DeleteDeviceModel } from "../api/models/input";
+import { DevicesRepository_TYPEORM } from "../infrastructure/typeORM/devices.repository";
+import { DevicesQueryRepository_TYPEORM } from "../infrastructure/typeORM/devices.query.repository";
 
 @Injectable()
 export class DevicesService {
-  constructor(private devicesRepository:DevicesRepository,
-              private devicesQueryRepository:DevicesQueryRepository) {}
+  constructor(private devicesRepository:DevicesRepository_TYPEORM,
+              private devicesQueryRepository:DevicesQueryRepository_TYPEORM) {}
 
   async deleteDevice(requestData:DeleteDeviceModel):Promise<void> {
 

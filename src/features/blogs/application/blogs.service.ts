@@ -9,12 +9,15 @@ import { OutputBlogModel } from "../api/models/output";
 import { PostQueryModel } from "../../posts/api/models/input";
 import { PostsQueryRepository } from "../../posts/infrastructure/posts.query.repository";
 import { OutputPostModel } from "../../posts/api/models/output";
+import { BlogsQueryRepository_TYPEORM } from "../infrastructure/typeORM-repositories/blogs.query.repository";
+import { PostsQueryRepository_TYPEORM } from "../../posts/infrastructure/typeORM/posts.query.repository";
+import { BlogsRepository_TYPEORM } from "../infrastructure/typeORM-repositories/blogs.repository";
 
 @Injectable()
 export class BlogsService {
-  constructor(private blogsRepository:BlogsRepository,
-              private blogsQueryRepository:BlogsQueryRepository,
-              private postsQueryRepository:PostsQueryRepository) {}
+  constructor(private blogsRepository:BlogsRepository_TYPEORM,
+              private blogsQueryRepository:BlogsQueryRepository_TYPEORM,
+              private postsQueryRepository:PostsQueryRepository_TYPEORM) {}
 
   async deleteBlog(id:number):Promise<void> {
      await this.blogsRepository.deleteBlog(id)

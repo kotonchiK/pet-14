@@ -1,10 +1,11 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from "../../features/users/application/auth.service";
+import { AuthService_TYPEORM } from "../../features/users/application/typeORM/auth.service";
 
 @Injectable()
 export class RefreshTokenMiddleware implements NestMiddleware {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService_TYPEORM) {}
   async use(req: Request, res: Response, next: NextFunction) {
     if (!req.cookies.refreshToken) throw new UnauthorizedException('error')
 

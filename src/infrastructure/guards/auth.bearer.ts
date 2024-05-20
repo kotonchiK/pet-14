@@ -2,10 +2,14 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Observable } from "rxjs";
 import { UsersQueryRepository } from "../../features/users/infrastructure/users.query.repository";
 import { JwtAuthService } from "../../features/users/application/jwt.service";
+import { JwtAuthService_TYPEORM } from "../../features/users/application/typeORM/jwt.service";
+import {
+  UsersQueryRepository_TYPEORM
+} from "../../features/users/infrastructure/typeORM-repositories/users.query.repository";
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtAuthService,
-  private readonly usersQueryRepository:UsersQueryRepository) {}
+  constructor(private readonly jwtService: JwtAuthService_TYPEORM,
+  private readonly usersQueryRepository:UsersQueryRepository_TYPEORM) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {

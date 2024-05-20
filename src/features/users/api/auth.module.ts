@@ -2,13 +2,6 @@ import { Module, RequestMethod } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { UsersService } from "../application/users.service";
 import { UsersQueryRepository } from "../infrastructure/users.query.repository";
-import { MongooseModule } from "@nestjs/mongoose";
-import {
-  EmailConfirmationTest,
-  passwordChangeFeature, passwordChangeTest,
-  TokensFeature, TokensTest,
-  UserFeature, UserTest
-} from "../../../infrastructure/domains/schemas/users.schema";
 import { UsersRepository } from "../infrastructure/users.repository";
 import { AuthService } from "../application/auth.service";
 import { JwtAuthService } from "../application/jwt.service";
@@ -17,26 +10,35 @@ import { EmailAdapter } from "../../../infrastructure/email/email.adapter";
 import { RefreshTokenMiddleware } from "../../../infrastructure/middlewares/refToken.mdw";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { JwtService } from "@nestjs/jwt";
-import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
-import { APP_GUARD } from "@nestjs/core";
-import { SequelizeModule } from "@nestjs/sequelize";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthThrottlerSettings } from "../../../app.settings";
+import { UsersQueryRepository_TYPEORM } from "../infrastructure/typeORM-repositories/users.query.repository";
+import { UsersRepository_TYPEORM } from "../infrastructure/typeORM-repositories/users.repository";
+import { JwtAuthService_TYPEORM } from "../application/typeORM/jwt.service";
+import { AuthService_TYPEORM } from "../application/typeORM/auth.service";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import {
+  PasswordChangeEntity,
+  TokensEntity,
+  UsersEntity
+} from "../infrastructure/domains/users.entity";
+import { BlogsEntity } from "../../blogs/infrastructure/domains/blogs.entity";
+import { PostsEntity, PostsLikesEntity } from "../../posts/infrastructure/domains/posts.entity";
+import { CommentsEntity, CommentsLikesEntity } from "../../comments/infrastructure/domains/comments.entity";
 
 @Module({
   controllers:[AuthController],
   providers:[
-    UsersRepository, UsersService, UsersQueryRepository, AuthService,
-    JwtAuthService, JwtAuthGuard, JwtService, EmailManager,EmailAdapter, RefreshTokenMiddleware
+    UsersService,
+    JwtAuthGuard, JwtService, EmailManager,EmailAdapter, RefreshTokenMiddleware,
+    UsersQueryRepository_TYPEORM, UsersRepository_TYPEORM, JwtAuthService_TYPEORM, AuthService_TYPEORM
   ],
-  exports:[UsersRepository, UsersService, UsersQueryRepository, AuthService, JwtAuthService, EmailManager,EmailAdapter],
+  exports:[EmailManager,EmailAdapter, UsersQueryRepository_TYPEORM,
+    UsersRepository_TYPEORM, JwtAuthService_TYPEORM, AuthService_TYPEORM],
   imports:[
-    ThrottlerModule.forRoot(AuthThrottlerSettings),
-    MongooseModule.forFeature([
-    UserFeature, TokensFeature, passwordChangeFeature
-  ]),
-  SequelizeModule.forFeature([
-    UserTest, passwordChangeTest, EmailConfirmationTest, TokensTest
-  ])]
+  // ThrottlerModule.forRoot(AuthThrottlerSettings),
+    TypeOrmModule.forFeature([BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, UsersEntity, PasswordChangeEntity, TokensEntity, CommentsLikesEntity])
+  ]
 })
 export class AuthModule {
   configure(consumer) {

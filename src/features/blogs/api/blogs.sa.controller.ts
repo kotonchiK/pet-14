@@ -21,6 +21,7 @@ import { Request } from "express";
 import { OutputPostModel } from "../../posts/api/models/output";
 import { BasicAuthGuard } from "../../../infrastructure/guards/auth.basic";
 import { CreateBlogDto, CreatePostBlogDto } from "./models/input";
+import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 
 @Controller('sa/blogs')
 @UseGuards(BasicAuthGuard)

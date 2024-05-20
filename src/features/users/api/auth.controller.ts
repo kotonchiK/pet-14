@@ -10,19 +10,19 @@ import {
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
-import { AuthService } from "../application/auth.service";
 import { CodeDto, CreateUserDto, loginUserDto, MailDto, NewPasswordDto } from "./models/input";
 import { Response, Request } from 'express';
 import { RefreshTokenMiddleware } from "../../../infrastructure/middlewares/refToken.mdw";
 import { JwtAuthGuard } from "../../../infrastructure/guards/auth.bearer";
 import { UserMeInfoType } from "./models/output";
 import { SkipThrottle, Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { AuthService_TYPEORM } from "../application/typeORM/auth.service";
 
 
 @Controller('auth')
-@UseGuards(ThrottlerGuard)
+// @UseGuards(ThrottlerGuard)
 export class AuthController {
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService_TYPEORM) {
   }
 
 

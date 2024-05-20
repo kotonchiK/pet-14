@@ -9,14 +9,16 @@ import {
 import { CodeDto, UserDb } from "../api/models/input";
 import { randomUUID } from "node:crypto";
 import { add } from "date-fns";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
 import { InjectModel } from "@nestjs/sequelize";
 import { where } from "sequelize";
-
+import { Repository } from 'typeorm';
+import { UsersEntity } from "./domains/users.entity";
 export class UsersRepository {
   constructor(@InjectModel(UserTest) private readonly userModel: typeof UserTest,
-              @InjectModel(EmailConfirmationTest) private readonly emailConfirmationTest: typeof EmailConfirmationTest){}
+              @InjectModel(EmailConfirmationTest) private readonly emailConfirmationTest: typeof EmailConfirmationTest,
+             ){}
   async createUser(newUser:UserDb):Promise<UserTest | null> {
     try {
       const emailConfirmation = await this.emailConfirmationTest.create(newUser.emailConfirmation)

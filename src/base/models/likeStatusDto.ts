@@ -12,3 +12,9 @@ export type statusType = {
   status:"None" | "Dislike" | "Like"
   userId:number
 }
+
+export enum LikeStatus {
+  Like = 'Like',
+  Dislike = 'Dislike',
+  None = 'None'
+}

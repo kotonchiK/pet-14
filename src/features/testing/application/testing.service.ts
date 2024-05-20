@@ -1,38 +1,38 @@
 import { Injectable } from "@nestjs/common";
-import { BlogTest } from "../../../infrastructure/domains/schemas/blogs.schema";
-import {
-  PostLikesTest,
-  PostTest
-} from "../../../infrastructure/domains/schemas/posts.schema";
-import { CommentTest } from "../../../infrastructure/domains/schemas/comments.schema";
-import {
-  EmailConfirmationTest, passwordChangeTest,
-  TokensTest,
-UserTest
-} from "../../../infrastructure/domains/schemas/users.schema";
 import { InjectModel } from "@nestjs/sequelize";
+import { BlogsEntity } from "../../blogs/infrastructure/domains/blogs.entity";
+import { Repository } from "typeorm";
+import { PostsEntity, PostsLikesEntity } from "../../posts/infrastructure/domains/posts.entity";
+import { CommentsEntity } from "../../comments/infrastructure/domains/comments.entity";
+import {
+  PasswordChangeEntity,
+  TokensEntity,
+  UsersEntity
+} from "../../users/infrastructure/domains/users.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class TestingService {
-  constructor(@InjectModel(BlogTest) private blogModel:typeof BlogTest,
-              @InjectModel(PostTest) private postModel:typeof PostTest,
-              @InjectModel(CommentTest) private commentModel:typeof CommentTest,
-              @InjectModel(UserTest) private userModel:typeof UserTest,
-              @InjectModel(PostLikesTest) private postLikesModel:typeof PostLikesTest,
-              @InjectModel(TokensTest) private tokensModel:typeof TokensTest,
-              @InjectModel(passwordChangeTest) private passwordChangeModel:typeof passwordChangeTest,
-              @InjectModel(EmailConfirmationTest) private emailConfirmationModel:typeof EmailConfirmationTest
+  constructor(@InjectRepository(BlogsEntity) private blogModel:Repository<BlogsEntity>,
+              @InjectRepository(PostsEntity) private postModel:Repository<PostsEntity>,
+              @InjectRepository(CommentsEntity) private commentModel:Repository<CommentsEntity>,
+              @InjectRepository(UsersEntity) private userModel:Repository<UsersEntity>,
+              @InjectRepository(PostsLikesEntity) private postLikesModel:Repository<PostsLikesEntity>,
+              @InjectRepository(TokensEntity) private tokensModel:Repository<TokensEntity>,
+              @InjectRepository(PasswordChangeEntity) private passwordChangeModel:Repository<PasswordChangeEntity>,
 
 
   ) {}
   async deleteAllData():Promise<void>{
-    await this.blogModel.destroy({ where: {} });
-    await this.postModel.destroy({ where: {} });
-    await this.commentModel.destroy({ where: {} });
-    await this.userModel.destroy({ where: {} });
-    await this.postLikesModel.destroy({ where: {} });
-    await this.tokensModel.destroy({ where: {} });
-    await this.passwordChangeModel.destroy({ where: {} });
-    await this.emailConfirmationModel.destroy({ where: {} });
+    // Удаление зависимых данных сначала
+    await this.postLikesModel.delete({});
+    await this.tokensModel.delete({});
+    await this.passwordChangeModel.delete({});
+
+    // Удаление основных данных
+    await this.commentModel.delete({});
+    await this.postModel.delete({});
+    await this.blogModel.delete({});
+    await this.userModel.delete({});
   }
 }

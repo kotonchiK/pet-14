@@ -20,19 +20,31 @@ import { JwtAuthService } from "../../users/application/jwt.service";
 import { EmailAdapter } from "../../../infrastructure/email/email.adapter";
 import { RefreshTokenMiddleware } from "../../../infrastructure/middlewares/refToken.mdw";
 import { SequelizeModule } from "@nestjs/sequelize";
+import { DevicesRepository_TYPEORM } from "../infrastructure/typeORM/devices.repository";
+import { DevicesQueryRepository_TYPEORM } from "../infrastructure/typeORM/devices.query.repository";
+import { JwtAuthService_TYPEORM } from "../../users/application/typeORM/jwt.service";
+import { AuthService_TYPEORM } from "../../users/application/typeORM/auth.service";
+import { UsersRepository_TYPEORM } from "../../users/infrastructure/typeORM-repositories/users.repository";
+import { UsersQueryRepository_TYPEORM } from "../../users/infrastructure/typeORM-repositories/users.query.repository";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import {
+  PasswordChangeEntity,
+  TokensEntity,
+  UsersEntity
+} from "../../users/infrastructure/domains/users.entity";
+import { BlogsEntity } from "../../blogs/infrastructure/domains/blogs.entity";
+import { PostsEntity, PostsLikesEntity } from "../../posts/infrastructure/domains/posts.entity";
+import { CommentsEntity, CommentsLikesEntity } from "../../comments/infrastructure/domains/comments.entity";
 
 @Module({
   controllers: [DevicesController],
-  exports: [DevicesRepository, DevicesService, DevicesQueryRepository],
-  imports: [MongooseModule.forFeature([
-    UserFeature, TokensFeature, passwordChangeFeature
-  ]),
-    SequelizeModule.forFeature([
-      UserTest, TokensTest, passwordChangeTest, EmailConfirmationTest
-    ])],
+  exports: [DevicesRepository_TYPEORM, DevicesService, DevicesQueryRepository_TYPEORM],
+  imports: [
+    TypeOrmModule.forFeature([BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, UsersEntity, PasswordChangeEntity, TokensEntity, CommentsLikesEntity])
+  ],
   providers: [
-    JwtAuthService, EmailAdapter,
-    DevicesRepository, DevicesService, DevicesQueryRepository, AuthService, UsersRepository, UsersQueryRepository, UsersService, EmailManager]
+    JwtAuthService_TYPEORM, EmailAdapter,
+    DevicesRepository_TYPEORM, DevicesService, DevicesQueryRepository_TYPEORM, AuthService_TYPEORM, UsersRepository_TYPEORM, UsersQueryRepository_TYPEORM, UsersService, EmailManager]
 })
 export class DevicesModule {
   configure(consumer) {

@@ -27,12 +27,13 @@ import { CommentsQueryRepository } from "../../comments/infrastructure/comments.
 import { CurrentUserIdPipe } from "../../../infrastructure/pipes/currentUserId.pipe";
 import { LikeStatusDto } from "../../../base/models/likeStatusDto";
 import { ValidateIdPipe } from "../../../infrastructure/pipes/ValidateIdNumber";
+import { CommentsQueryRepository_TYPEORM } from "../../comments/infrastructure/typeORM/comments.query.repository";
 
 @Controller('/posts')
 export class PostsController {
   constructor(private postsService:PostsService,
               private commentService:CommentsService,
-              private commentQueryRepo:CommentsQueryRepository) {}
+              private commentQueryRepo:CommentsQueryRepository_TYPEORM) {}
 
   @Get()
   @UsePipes(ValidationPipe)

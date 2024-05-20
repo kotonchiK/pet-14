@@ -9,11 +9,13 @@ import { Pagination } from "../../../base/types/pagination.type";
 import { UsersRepository } from "../infrastructure/users.repository";
 import { add } from "date-fns";
 import { randomUUID } from "node:crypto";
+import { UsersRepository_TYPEORM } from "../infrastructure/typeORM-repositories/users.repository";
+import { UsersQueryRepository_TYPEORM } from "../infrastructure/typeORM-repositories/users.query.repository";
 
 @Injectable()
 export class UsersService {
-  constructor(private usersRepository:UsersRepository,
-              private usersQueryRepository:UsersQueryRepository) {}
+  constructor(private usersRepository:UsersRepository_TYPEORM,
+              private usersQueryRepository:UsersQueryRepository_TYPEORM) {}
 
   async deleteUser(id:number):Promise<void> {
     await this.usersRepository.deleteUser(id)

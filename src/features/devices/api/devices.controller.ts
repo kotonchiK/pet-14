@@ -14,12 +14,13 @@ import { RefreshTokenMiddleware } from "../../../infrastructure/middlewares/refT
 import {Request} from "express";
 import { DevicesQueryRepository } from "../infrastructure/devices.query.repository";
 import { ValidateIdPipe } from "../../../infrastructure/pipes/ValidateIdNumber";
+import { DevicesQueryRepository_TYPEORM } from "../infrastructure/typeORM/devices.query.repository";
 
 @Controller('security/devices')
 @UseInterceptors(RefreshTokenMiddleware)
 export class DevicesController {
   constructor(private devicesService:DevicesService,
-              private devicesQueryRepository:DevicesQueryRepository) {}
+              private devicesQueryRepository:DevicesQueryRepository_TYPEORM) {}
 
   @Get()
   async getDevices(@Req() req:Request):Promise<Sessions[]>{

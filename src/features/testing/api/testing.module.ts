@@ -17,17 +17,21 @@ import {
 } from "../../../infrastructure/domains/schemas/users.schema";
 import { TestingService } from "../application/testing.service";
 import { SequelizeModule } from "@nestjs/sequelize";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { BlogsEntity } from "../../blogs/infrastructure/domains/blogs.entity";
+import { PostsEntity, PostsLikesEntity } from "../../posts/infrastructure/domains/posts.entity";
+import { CommentsEntity, CommentsLikesEntity } from "../../comments/infrastructure/domains/comments.entity";
+import {
+  PasswordChangeEntity,
+  TokensEntity,
+  UsersEntity
+} from "../../users/infrastructure/domains/users.entity";
 
 @Module({
   controllers:[TestingController],
   providers:[TestingService],
   exports:[TestingService],
   imports:[
-    MongooseModule.forFeature([
-    BlogFeature, PostFeature, PostLikesFeature, CommentFeature, UserFeature, passwordChangeFeature, TokensFeature
-  ]),
-  SequelizeModule.forFeature([
-    BlogTest, PostTest, PostLikesTest, CommentTest, UserTest, passwordChangeTest, TokensTest, EmailConfirmationTest
-  ])]
+  TypeOrmModule.forFeature([BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, UsersEntity, PasswordChangeEntity, TokensEntity, CommentsLikesEntity])]
 })
 export class TestingModule{}

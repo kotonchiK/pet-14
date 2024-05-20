@@ -13,13 +13,25 @@ import { join } from 'path';
 import { AuthModule } from "./features/users/api/auth.module";
 import { CurrentUserIdPipe } from "./infrastructure/pipes/currentUserId.pipe";
 import { DevicesModule } from "./features/devices/api/devices.module";
-import { appConfig } from "./app.settings";
+import { appConfig, TypeOrmSettings } from "./app.settings";
 import { SequelizeModule } from "@nestjs/sequelize";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import {
+  PasswordChangeEntity,
+  TokensEntity,
+  UsersEntity
+} from "./features/users/infrastructure/domains/users.entity";
+import { BlogsEntity } from "./features/blogs/infrastructure/domains/blogs.entity";
+import { PostsEntity, PostsLikesEntity } from "./features/posts/infrastructure/domains/posts.entity";
+import { CommentsEntity, CommentsLikesEntity } from "./features/comments/infrastructure/domains/comments.entity";
 
 @Module({
   controllers:[AppController],
-  providers:[CurrentUserIdPipe],
+  providers:[
+    CurrentUserIdPipe
+  ],
   imports:[
+
     UsersModule,
     BlogsModule,
     PostsModule,
@@ -32,21 +44,10 @@ import { SequelizeModule } from "@nestjs/sequelize";
       envFilePath:'.env'
     }),
 
-  SequelizeModule.forRoot({
-    dialect: 'postgres',
-    host: process.env.DB_SQL_HOST,
-    port: Number(process.env.DB_SQL_PORT),
-    username: process.env.DB_SQL_USERNAME,
-    password: process.env.DB_SQL_PASSWORD,
-    database: process.env.DB_SQL_DATABASE,
-    synchronize:true,
-    autoLoadModels:true,
-    define:{
-      timestamps:false
-    }
-  }),
 
-    MongooseModule.forRoot(appConfig.MongoURL),
+   // SequelizeModule.forRoot(sett),
+
+    TypeOrmModule.forRoot(TypeOrmSettings),
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
@@ -60,4 +61,5 @@ export class AppModule {
   consumer
     .apply(CurrentUserIdPipe)
     .forRoutes('*');
-}}
+}
+}

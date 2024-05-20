@@ -1,7 +1,8 @@
 import { BlogDocument, BlogTest } from "../domains/schemas/blogs.schema";
 import { OutputBlogModel } from "../../features/blogs/api/models/output";
+import { BlogsEntity } from "../../features/blogs/infrastructure/domains/blogs.entity";
 
-export const blogsMapper2 = (blog:BlogTest):OutputBlogModel => {
+export const blogsMapper2 = (blog:BlogTest | BlogsEntity):OutputBlogModel => {
   return {
     id:blog.id.toString(),
     name:blog.name,

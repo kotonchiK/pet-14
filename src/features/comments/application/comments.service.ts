@@ -5,13 +5,17 @@ import { PostsQueryRepository } from "../../posts/infrastructure/posts.query.rep
 import { CommentsRepository } from "../infrastructure/comments.repository";
 import { UsersQueryRepository } from "../../users/infrastructure/users.query.repository";
 import { statusType } from "../../../base/models/likeStatusDto";
+import { CommentsQueryRepository_TYPEORM } from "../infrastructure/typeORM/comments.query.repository";
+import { PostsQueryRepository_TYPEORM } from "../../posts/infrastructure/typeORM/posts.query.repository";
+import { CommentsRepository_TYPEORM } from "../infrastructure/typeORM/comments.repository";
+import { UsersQueryRepository_TYPEORM } from "../../users/infrastructure/typeORM-repositories/users.query.repository";
 
 @Injectable()
 export class CommentsService {
-  constructor(private commentsQueryRepository:CommentsQueryRepository,
-              private postQueryRepository:PostsQueryRepository,
-              private commentRepository:CommentsRepository,
-              private userQueryRepository:UsersQueryRepository
+  constructor(private commentsQueryRepository:CommentsQueryRepository_TYPEORM,
+              private postQueryRepository:PostsQueryRepository_TYPEORM,
+              private commentRepository:CommentsRepository_TYPEORM,
+              private userQueryRepository:UsersQueryRepository_TYPEORM
 
               ) {}
 
