@@ -1,19 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, ManyToOne } from "typeorm";
-// @Entity()
-// export class EmailConfirmationEntity {
-//   @PrimaryGeneratedColumn()
-//   id: number;
-//
-//   @Column("text")
-//   confirmationCode: string;
-//
-//   @Column('date')
-//   expirationDate: Date;
-//
-//   @Column("boolean")
-//   isConfirmed: boolean;
-//
-// }
 @Entity()
 export class UsersEntity {
   @PrimaryGeneratedColumn()
@@ -34,15 +19,12 @@ export class UsersEntity {
   @Column("text")
   confirmationCode: string;
 
-    @Column('date')
+  @Column('date')
   expirationDate: Date;
 
   @Column("boolean")
   isConfirmed: boolean;
 
-  // @OneToOne(() => EmailConfirmationEntity)
-  // @JoinColumn({ name: 'emailConfirmationId' })
-  // emailConfirmation: EmailConfirmationEntity;
 }
 
 

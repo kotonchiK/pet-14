@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
 import { BlogsEntity } from "../../blogs/infrastructure/domains/blogs.entity";
 import { Repository } from "typeorm";
 import { PostsEntity, PostsLikesEntity } from "../../posts/infrastructure/domains/posts.entity";
@@ -10,6 +9,8 @@ import {
   UsersEntity
 } from "../../users/infrastructure/domains/users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GameEntity } from "../../quiz/infrastructure/domains/game.entity";
+import { QuestionEntity } from "../../quiz/infrastructure/domains/question.entity";
 
 @Injectable()
 export class TestingService {
@@ -20,7 +21,8 @@ export class TestingService {
               @InjectRepository(PostsLikesEntity) private postLikesModel:Repository<PostsLikesEntity>,
               @InjectRepository(TokensEntity) private tokensModel:Repository<TokensEntity>,
               @InjectRepository(PasswordChangeEntity) private passwordChangeModel:Repository<PasswordChangeEntity>,
-
+              @InjectRepository(GameEntity) private gameModel:Repository<GameEntity>,
+              @InjectRepository(QuestionEntity) private questionsModel:Repository<QuestionEntity>,
 
   ) {}
   async deleteAllData():Promise<void>{
@@ -28,11 +30,14 @@ export class TestingService {
     await this.postLikesModel.delete({});
     await this.tokensModel.delete({});
     await this.passwordChangeModel.delete({});
+    await this.gameModel.delete({});
+
 
     // Удаление основных данных
     await this.commentModel.delete({});
     await this.postModel.delete({});
     await this.blogModel.delete({});
     await this.userModel.delete({});
+    await this.questionsModel.delete({});
   }
 }

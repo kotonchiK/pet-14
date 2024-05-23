@@ -18,6 +18,7 @@ import {
 import { BlogsEntity } from "./features/blogs/infrastructure/domains/blogs.entity";
 import { PostsEntity, PostsLikesEntity } from "./features/posts/infrastructure/domains/posts.entity";
 import { CommentsEntity, CommentsLikesEntity } from "./features/comments/infrastructure/domains/comments.entity";
+import { QuestionEntity } from "./features/quiz/infrastructure/domains/question.entity";
 
 configDotenv()
 
@@ -69,7 +70,7 @@ export const TypeOrmSettings:TypeOrmModuleOptions = {
   database: 'blogs',
 
 
-  entities: [UsersEntity, BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, CommentsLikesEntity, TokensEntity, PasswordChangeEntity,],
+  entities: [UsersEntity, BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, CommentsLikesEntity, TokensEntity, PasswordChangeEntity, QuestionEntity],
   synchronize: true,
   autoLoadEntities:true,
 }

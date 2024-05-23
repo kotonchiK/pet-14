@@ -1,15 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { add } from "date-fns";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UsersEntity } from "../domains/users.entity";
 import { CodeDto, MailDto, UserDb } from "../../api/models/input";
 export class UsersRepository_TYPEORM {
   constructor(
     @InjectRepository(UsersEntity) private usersRepository:Repository<UsersEntity>,
-    private dataSource: DataSource,
   ){}
+
+  async getUserEntity(userId:number):Promise<UsersEntity>{
+    const user = await this.usersRepository.findOne({where:{id:userId}});
+
+    if(!user) throw new NotFoundException()
+
+    return user
+  }
   async createUser(newUser:UserDb):Promise<UsersEntity | null> {
     try {
       const user = {
