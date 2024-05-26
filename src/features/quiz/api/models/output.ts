@@ -28,3 +28,12 @@ export enum GameStatus {
   Active = "Active",
   Finished = "Finished"
 }
+
+export type Statistic = {
+  sumScore: number
+  avgScores: number
+  gamesCount: number
+  winsCount: number
+  lossesCount: number
+  drawsCount: number
+}

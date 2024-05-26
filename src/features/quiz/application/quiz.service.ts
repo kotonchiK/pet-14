@@ -1,12 +1,17 @@
 import { BadRequestException, ForbiddenException, Injectable} from "@nestjs/common";
 import {gameMapper} from "./game.mapper";
-import { Answers, GameStatus } from "../api/models/output";
+import { Answers, GameStatus, Statistic } from "../api/models/output";
 import { QuizRepository } from "../infrastructure/typeORM-repositories/quiz.repository";
 import { GameService } from "./game.service";
 import { AnswersService } from "./answers.service";
 import { QuestionsService } from "./questions.service";
 import { UsersRepository_TYPEORM } from "../../users/infrastructure/typeORM-repositories/users.repository";
 import { OutputGameModel } from "../api/models/game.output";
+import { InjectRepository } from "@nestjs/typeorm";
+import { StatisticEntity } from "../infrastructure/domains/game.entity";
+import { Repository } from "typeorm";
+import { statisticMapper } from "./statistic.mapper";
+import { GamesQueryModel } from "../api/models/input";
 
 @Injectable()
 export class QuizService {
@@ -14,8 +19,31 @@ export class QuizService {
               private gameService:GameService,
               private answersService:AnswersService,
               private questionsService:QuestionsService,
-              private userRepository:UsersRepository_TYPEORM) {}
+              private userRepository:UsersRepository_TYPEORM,
+              @InjectRepository(StatisticEntity) private statisticRepo:Repository<StatisticEntity>) {}
 
+
+  async getAllUserGames(userId:number, query:GamesQueryModel) {
+
+    const sortData = {
+      sortBy:query.sortBy ?? "pairCreatedDate",
+      sortDirection:query.sortDirection ?? "DESC",
+      pageNumber:query.pageNumber ? +query.pageNumber : 1,
+      pageSize:query.pageSize ? +query.pageSize : 10
+    }
+
+    return await this.quizRepository.getAllUserGames(userId, sortData)
+  }
+
+  async getStatisticForUser(userId:number):Promise<Statistic> {
+
+    const games = await this.statisticRepo.findOne({where:{userId:userId}})
+
+    if(!games) return statisticMapper()
+
+    return statisticMapper(games)
+
+  }
   async getUserUnfinishedGame(userId:number):Promise<OutputGameModel>{
 
     const game = await this.gameService.getUserUnfinishedGame(userId)
@@ -34,7 +62,6 @@ export class QuizService {
     const {answersForFirstPlayer, answersForSecondPlayer} = await this.answersService.getAnswersForPlayers(game)
 
     return gameMapper(game, answersForFirstPlayer, answersForSecondPlayer)
-
   }
 
   async answerOnQuestion(answer:string, userId:number):Promise<Answers> {
@@ -91,9 +118,8 @@ export class QuizService {
       const finalGame = await this.gameService.getGameById(game.id)
 
       const {answersForFirstPlayer, answersForSecondPlayer} = await this.answersService.getAnswersForPlayers(finalGame);
-      const finishedGame = await this.gameService.finishTheGame(finalGame, answersForFirstPlayer, answersForSecondPlayer)
+      await this.gameService.finishTheGame(finalGame, answersForFirstPlayer, answersForSecondPlayer)
 
-      await this.gameService.saveGame(finishedGame)
     }
 
     return {

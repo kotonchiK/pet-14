@@ -9,7 +9,7 @@ import {
   UsersEntity
 } from "../../users/infrastructure/domains/users.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { GameEntity } from "../../quiz/infrastructure/domains/game.entity";
+import { GameEntity, StatisticEntity } from "../../quiz/infrastructure/domains/game.entity";
 import { QuestionEntity } from "../../quiz/infrastructure/domains/question.entity";
 
 @Injectable()
@@ -23,6 +23,7 @@ export class TestingService {
               @InjectRepository(PasswordChangeEntity) private passwordChangeModel:Repository<PasswordChangeEntity>,
               @InjectRepository(GameEntity) private gameModel:Repository<GameEntity>,
               @InjectRepository(QuestionEntity) private questionsModel:Repository<QuestionEntity>,
+              @InjectRepository(StatisticEntity) private statisticModel:Repository<StatisticEntity>
 
   ) {}
   async deleteAllData():Promise<void>{
@@ -31,6 +32,7 @@ export class TestingService {
     await this.tokensModel.delete({});
     await this.passwordChangeModel.delete({});
     await this.gameModel.delete({});
+    await this.statisticModel.delete({})
 
 
     // Удаление основных данных

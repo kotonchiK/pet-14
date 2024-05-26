@@ -48,3 +48,10 @@ export type QuestionsQueryModel = {
   pageNumber?:number
   pageSize?:number
 }
+
+export type GamesQueryModel = {
+  sortBy?: string
+  sortDirection?:'ASC' | 'DESC'
+  pageNumber?:number
+  pageSize?:number
+}

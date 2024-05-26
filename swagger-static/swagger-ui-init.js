@@ -54,6 +54,50 @@ window.onload = function() {
           }
         }
       },
+      "/pair-game-quiz/pairs/my": {
+        "get": {
+          "operationId": "Quiz_Controller_getAllUserGames",
+          "parameters": [
+            {
+              "name": "sortBy",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "pageNumber",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/pair-game-quiz/pairs/{id}": {
         "get": {
           "operationId": "Quiz_Controller_getGameById",
@@ -67,6 +111,17 @@ window.onload = function() {
               }
             }
           ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/users/my-statistic": {
+        "get": {
+          "operationId": "Quiz_Controller_getStatisticForUser",
+          "parameters": [],
           "responses": {
             "200": {
               "description": ""

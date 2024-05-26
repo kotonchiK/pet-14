@@ -15,7 +15,7 @@ import { QuestionsService } from "../application/questions.service";
 import { QuizRepository } from "../infrastructure/typeORM-repositories/quiz.repository";
 import { GameService } from "../application/game.service";
 import { AnswersService } from "../application/answers.service";
-import { GameEntity } from "../infrastructure/domains/game.entity";
+import { GameEntity, StatisticEntity } from "../infrastructure/domains/game.entity";
 import { QuestionEntity } from "../infrastructure/domains/question.entity";
 
 @Module({
@@ -24,7 +24,7 @@ import { QuestionEntity } from "../infrastructure/domains/question.entity";
   ],
   exports:[],
   imports:[
-    TypeOrmModule.forFeature([QuestionEntity, GameEntity, UsersEntity, TokensEntity])
+    TypeOrmModule.forFeature([StatisticEntity, QuestionEntity, GameEntity, UsersEntity, TokensEntity])
   ],
 
 })

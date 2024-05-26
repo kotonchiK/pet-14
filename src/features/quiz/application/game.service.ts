@@ -5,7 +5,7 @@ import { Brackets, Repository } from "typeorm";
 import { Answers, GameStatus } from "../api/models/output";
 import { QuizRepository } from "../infrastructure/typeORM-repositories/quiz.repository";
 import { UsersRepository_TYPEORM } from "../../users/infrastructure/typeORM-repositories/users.repository";
-import { GameEntity } from "../infrastructure/domains/game.entity";
+import { GameEntity, StatisticEntity } from "../infrastructure/domains/game.entity";
 import { OutputGameModel } from "../api/models/game.output";
 import { GameDb } from "../api/models/db";
 
@@ -14,7 +14,8 @@ export class GameService {
   constructor(private questionsRepository:QuestionsRepository,
               private quizRepository:QuizRepository,
               private userRepository:UsersRepository_TYPEORM,
-              @InjectRepository(GameEntity) private gameOrmRepository:Repository<GameEntity>) {}
+              @InjectRepository(GameEntity) private gameOrmRepository:Repository<GameEntity>,
+              @InjectRepository(StatisticEntity) private statRepo:Repository<StatisticEntity>) {}
 
   async getGameById(gameId:number):Promise<GameEntity>{
 
@@ -33,7 +34,7 @@ export class GameService {
     }
   }
 
-  async finishTheGame(game:GameEntity, answersForFirstPlayer:Answers[], answersForSecondPlayer:Answers[]): Promise<GameEntity> {
+  async finishTheGame(game:GameEntity, answersForFirstPlayer:Answers[], answersForSecondPlayer:Answers[]): Promise<void> {
     game.status = GameStatus.Finished;
     game.finishGameDate = new Date();
 
@@ -62,8 +63,88 @@ export class GameService {
       game.player2.score += 1;
     }
 
-    return game;
+    await this.saveGame(game)
+
+    const finishedGame = await this.gameOrmRepository.findOne({where:{id:game.id}})
+
+    await this.updateStatistic(finishedGame)
+
   }
+  async updateStatistic(game: GameEntity): Promise<void> {
+    const user1 = game.player1;
+    const user2 = game.player2;
+
+    const user_1_Stat = await this.statRepo.findOne({ where: { userId: user1.id } });
+    const user_2_Stat = await this.statRepo.findOne({ where: { userId: user2.id } });
+
+    let winsCount_1 = 0;
+    let lossesCount_1 = 0;
+    let drawsCount_1 = 0;
+
+    let winsCount_2 = 0;
+    let lossesCount_2 = 0;
+    let drawsCount_2 = 0;
+
+    if (user1.score > user2.score) {
+      winsCount_1 = 1;
+      lossesCount_2 = 1;
+    } else if (user2.score > user1.score) {
+      winsCount_2 = 1;
+      lossesCount_1 = 1;
+    } else {
+      drawsCount_1 = 1;
+      drawsCount_2 = 1;
+    }
+
+    // Обработка статистики первого пользователя
+    if (!user_1_Stat) {
+      // Создание новой записи
+      const newStatistic = {
+        userId: user1.id,
+        sumScore: user1.score,
+        gamesCount: 1,
+        winsCount: winsCount_1,
+        lossesCount: lossesCount_1,
+        drawsCount: drawsCount_1
+      };
+
+      await this.statRepo.save(newStatistic);
+    } else {
+      // Обновление существующей записи
+      user_1_Stat.gamesCount += 1;
+      user_1_Stat.sumScore += user1.score;
+      user_1_Stat.winsCount += winsCount_1;
+      user_1_Stat.lossesCount += lossesCount_1;
+      user_1_Stat.drawsCount += drawsCount_1;
+
+      await this.statRepo.save(user_1_Stat);
+    }
+
+    // Обработка статистики второго пользователя
+    if (!user_2_Stat) {
+      // Создание новой записи
+      const newStatistic = {
+        userId: user2.id,
+        sumScore: user2.score,
+        gamesCount: 1,
+        winsCount: winsCount_2,
+        lossesCount: lossesCount_2,
+        drawsCount: drawsCount_2
+      };
+
+      await this.statRepo.save(newStatistic);
+    } else {
+      // Обновление существующей записи
+      user_2_Stat.gamesCount += 1;
+      user_2_Stat.sumScore += user2.score;
+      user_2_Stat.winsCount += winsCount_2;
+      user_2_Stat.lossesCount += lossesCount_2;
+      user_2_Stat.drawsCount += drawsCount_2;
+
+      await this.statRepo.save(user_2_Stat);
+    }
+  }
+
 
 
 

@@ -31,3 +31,31 @@ export class GameEntity {
   @Column({type:'timestamp with time zone', nullable:true})
   finishGameDate: Date;
 }
+
+@Entity()
+export class StatisticEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('int')
+  userId:number
+
+  @Column('int')
+  sumScore:number
+
+
+  @Column('int')
+  gamesCount:number
+
+
+  @Column('int')
+  winsCount:number
+
+
+  @Column('int')
+  lossesCount:number
+
+  @Column('int')
+  drawsCount:number
+
+}

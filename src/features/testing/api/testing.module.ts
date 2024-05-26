@@ -10,7 +10,7 @@ import {
   TokensEntity,
   UsersEntity
 } from "../../users/infrastructure/domains/users.entity";
-import { GameEntity } from "../../quiz/infrastructure/domains/game.entity";
+import { GameEntity, StatisticEntity } from "../../quiz/infrastructure/domains/game.entity";
 import { QuestionEntity } from "../../quiz/infrastructure/domains/question.entity";
 
 @Module({
@@ -18,6 +18,6 @@ import { QuestionEntity } from "../../quiz/infrastructure/domains/question.entit
   providers:[TestingService],
   exports:[TestingService],
   imports:[
-  TypeOrmModule.forFeature([GameEntity, QuestionEntity, BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, UsersEntity, PasswordChangeEntity, TokensEntity, CommentsLikesEntity])]
+  TypeOrmModule.forFeature([StatisticEntity, GameEntity, QuestionEntity, BlogsEntity, PostsEntity, PostsLikesEntity, CommentsEntity, UsersEntity, PasswordChangeEntity, TokensEntity, CommentsLikesEntity])]
 })
 export class TestingModule{}
